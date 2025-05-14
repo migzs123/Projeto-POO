@@ -1,91 +1,104 @@
 package Controler;
 
-import Modelo.Personagem;
-import Modelo.Caveira;
-import Modelo.Hero;
-import Modelo.Chaser;
-import Modelo.BichinhoVaiVemHorizontal;
+import Modelo.*;
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
-import Modelo.BichinhoVaiVemVertical;
-import Modelo.ZigueZague;
+import Auxiliar.World;
 import auxiliar.Posicao;
-import java.awt.FlowLayout;
+
 import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import javax.swing.JButton;
 
 public class Tela extends javax.swing.JFrame implements MouseListener, KeyListener {
 
     private Hero hero;
     private ArrayList<Personagem> faseAtual;
+    private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
     private ControleDeJogo cj = new ControleDeJogo();
     private Graphics g2;
     private int cameraLinha = 0;
     private int cameraColuna = 0;
+    
+    private int levelAtual = 2;
+    private boolean mudandoLevel = false;
 
     public Tela() {
         Desenho.setCenario(this);
         initComponents();
         this.addMouseListener(this);
-        /*mouse*/
-
         this.addKeyListener(this);
-        /*teclado*/
- /*Cria a janela do tamanho do tabuleiro + insets (bordas) da janela*/
         this.setSize(Consts.RES * Consts.CELL_SIDE + getInsets().left + getInsets().right,
-                Consts.RES * Consts.CELL_SIDE + getInsets().top + getInsets().bottom);
+                    Consts.RES * Consts.CELL_SIDE + getInsets().top + getInsets().bottom);
+        
+        carregarLevel(levelAtual);
 
-        faseAtual = new ArrayList<Personagem>();
-
-        /*Cria faseAtual adiciona personagens*/
-        hero = new Hero("Robbo.png");
-        hero.setPosicao(0, 7);
-        this.addPersonagem(hero);
+    }
+    
+    public void carregarLevel(int n) {
+        faseAtual = new ArrayList<>();
+        mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
+        
+        try {
+            new World(Consts.PATH + n +  "mapa.png", this); // Padrão: 1mapa.png, 2mapa.png, etc.
+        } catch (IOException ex) {
+            Logger.getLogger(Tela.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void keyPressed (KeyEvent e){
+        if(hero == null) return;
+        
+        if(e.getKeyCode() == KeyEvent.VK_W) hero.moveUp();
+        else if(e.getKeyCode() == KeyEvent.VK_S) hero.moveDown();
+        else if(e.getKeyCode() == KeyEvent.VK_A) hero.moveLeft();
+        else if(e.getKeyCode() == KeyEvent.VK_D) hero.moveRight();
+        
+        if(e.getKeyCode() == KeyEvent.VK_N){
+            nextLevel();
+        }
         this.atualizaCamera();
+        this.setTitle("Level " + levelAtual + " -> Pos: " + hero.getPosicao().getColuna() + ", " + 
+                      hero.getPosicao().getLinha());
+    }
+    
+    public void nextLevel() {
+        if (levelAtual < Consts.TOTAL_LEVEIS) {
+            levelAtual++;
+            carregarLevel(levelAtual);
+        } else {
+            // Jogo completado
+            System.out.println("Parabéns! Você completou todos os níveis!");
+        }
+    }
 
-        ZigueZague zz = new ZigueZague("robo.png");
-        zz.setPosicao(5, 5);
-        this.addPersonagem(zz);
+    public void setTile(int linha, int coluna, Tile tile) {
+    if (linha >= 0 && linha < mapaBase.length && 
+        coluna >= 0 && coluna < mapaBase[0].length) {
+        mapaBase[linha][coluna] = tile;
+    }
+}
 
-        BichinhoVaiVemHorizontal bBichinhoH = new BichinhoVaiVemHorizontal("roboPink.png");
-        bBichinhoH.setPosicao(3, 3);
-        this.addPersonagem(bBichinhoH);
 
-        BichinhoVaiVemHorizontal bBichinhoH2 = new BichinhoVaiVemHorizontal("roboPink.png");
-        bBichinhoH2.setPosicao(6, 6);
-        this.addPersonagem(bBichinhoH2);
-        
-        BichinhoVaiVemVertical bVv = new BichinhoVaiVemVertical("Caveira.png");
-        bVv.setPosicao(10, 10);
-        this.addPersonagem(bVv);        
-        
-        Caveira bV = new Caveira("caveira.png");
-        bV.setPosicao(9, 1);
-        this.addPersonagem(bV);
-        
-        Chaser chase = new Chaser("chaser.png");
-        chase.setPosicao(12, 12);
-        this.addPersonagem(chase);        
-        
+    public Tile getTile(int linha, int coluna) {
+        return mapaBase[linha][coluna];
+    }
+
+    public void setHero(Hero h) {
+        this.hero = h;
+    }
+
+    public Hero getHero() {
+        return this.hero;
     }
 
     public int getCameraLinha() {
@@ -96,8 +109,20 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         return cameraColuna;
     }
 
+    public int getLevelAtual(){
+        return levelAtual;
+    }
+    
     public boolean ehPosicaoValida(Posicao p) {
-        return cj.ehPosicaoValida(this.faseAtual, p);
+        // Verifica se está dentro do mundo
+        if (p.getLinha() < 0 || p.getColuna() < 0 ||
+            p.getLinha() >= Consts.MUNDO_ALTURA || p.getColuna() >= Consts.MUNDO_LARGURA) {
+            return false;
+        }
+
+        // Verifica se o tile é transponível
+        Tile t = getTile(p.getLinha(), p.getColuna());
+        return t == null || t.isTransponivel();
     }
 
     public void addPersonagem(Personagem umPersonagem) {
@@ -114,32 +139,27 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
     public void paint(Graphics gOld) {
         Graphics g = this.getBufferStrategy().getDrawGraphics();
-        /*Criamos um contexto gráfico*/
         g2 = g.create(getInsets().left, getInsets().top, getWidth() - getInsets().right, getHeight() - getInsets().top);
-        /**
-         * ***********Desenha cenário de fundo*************
-         */
+
+        // Desenhar camada de fundo (tiles)
         for (int i = 0; i < Consts.RES; i++) {
             for (int j = 0; j < Consts.RES; j++) {
                 int mapaLinha = cameraLinha + i;
                 int mapaColuna = cameraColuna + j;
 
                 if (mapaLinha < Consts.MUNDO_ALTURA && mapaColuna < Consts.MUNDO_LARGURA) {
-                    try {
-                        Image newImage = Toolkit.getDefaultToolkit().getImage(
-                                new java.io.File(".").getCanonicalPath() + Consts.PATH + "blackTile.png");
-                        g2.drawImage(newImage,
-                                j * Consts.CELL_SIDE, i * Consts.CELL_SIDE,
-                                Consts.CELL_SIDE, Consts.CELL_SIDE, null);
-                    } catch (IOException ex) {
-                        Logger.getLogger(Tela.class.getName()).log(Level.SEVERE, null, ex);
+                    Tile tile = mapaBase[mapaLinha][mapaColuna];
+                    if (tile != null) {
+                        tile.desenhar(mapaLinha, mapaColuna);
                     }
                 }
             }
         }
-        if (!this.faseAtual.isEmpty()) {
-            this.cj.desenhaTudo(faseAtual);
-            this.cj.processaTudo(faseAtual);
+
+        // Desenhar personagens
+        if (!faseAtual.isEmpty()) {
+            cj.desenhaTudo(faseAtual);
+            cj.processaTudo(faseAtual);
         }
 
         g.dispose();
@@ -149,7 +169,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         }
     }
 
-    private void atualizaCamera() {
+    public void atualizaCamera() {
         int linha = hero.getPosicao().getLinha();
         int coluna = hero.getPosicao().getColuna();
 
@@ -158,48 +178,33 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     }
 
     public void go() {
-        TimerTask task = new TimerTask() {
-            public void run() {
-                repaint();
+    new Thread(() -> {
+        long lastTime = System.nanoTime();
+        double nsPerTick = 1_000_000_000.0 / 60.0; // 60 FPS alvo
+        double delta = 0;
+
+        while (true) {
+            long now = System.nanoTime();
+            delta += (now - lastTime) / nsPerTick;
+            lastTime = now;
+
+            while (delta >= 1) {
+                repaint(); // Renderização
+                delta--;
             }
-        };
-        Timer timer = new Timer();
-        timer.schedule(task, 0, Consts.PERIOD);
-    }
 
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_C) {
-            this.faseAtual.clear();
-        } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-            hero.moveUp();
-        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            hero.moveDown();
-        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            hero.moveLeft();
-        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            hero.moveRight();
+            try {
+                Thread.sleep(1); // Evita consumo excessivo da CPU
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        this.atualizaCamera();
-        this.setTitle("-> Cell: " + (hero.getPosicao().getColuna()) + ", "
-                + (hero.getPosicao().getLinha()));
+    }).start();
+}
 
-        //repaint(); /*invoca o paint imediatamente, sem aguardar o refresh*/
-    }
 
     public void mousePressed(MouseEvent e) {
-        /* Clique do mouse desligado*/
-        int x = e.getX();
-        int y = e.getY();
-
-        this.setTitle("X: " + x + ", Y: " + y
-                + " -> Cell: " + (y / Consts.CELL_SIDE) + ", " + (x / Consts.CELL_SIDE));
-
-        this.hero.getPosicao().setPosicao(y / Consts.CELL_SIDE, x / Consts.CELL_SIDE);
-
-        repaint();
     }
-
-
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
