@@ -34,7 +34,7 @@ public class World {
         } else if (pixel == 0xFF000000) { // preto - parede
             tela.setTile(y, x, new Tile(tela.getLevelAtual() +"wall.png", false));
         } else if (pixel == 0xFFFF0000) { // vermelho - herói
-            Hero h = new Hero("Robbo.png");
+            Hero h = new Hero("heroDown.png");
             h.setPosicao(y, x);
             tela.setHero(h);
             tela.addPersonagem(h);
