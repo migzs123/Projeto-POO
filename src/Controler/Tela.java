@@ -29,7 +29,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     private int cameraLinha = 0;
     private int cameraColuna = 0;
     
-    private int levelAtual = 2;
+    private int levelAtual = 1;
     private boolean mudandoLevel = false;
 
     public Tela() {
