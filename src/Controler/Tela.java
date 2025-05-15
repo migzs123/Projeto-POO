@@ -3,7 +3,6 @@ package Controler;
 import Modelo.*;
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
-import Auxiliar.World;
 import auxiliar.Posicao;
 
 import java.awt.Graphics;
@@ -22,15 +21,12 @@ import java.util.logging.Logger;
 public class Tela extends javax.swing.JFrame implements MouseListener, KeyListener {
 
     private Hero hero;
-    private ArrayList<Personagem> faseAtual;
-    private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
     private ControleDeJogo cj = new ControleDeJogo();
     private Graphics g2;
     private int cameraLinha = 0;
     private int cameraColuna = 0;
     
-    private int levelAtual = 1;
-    private boolean mudandoLevel = false;
+    public Fase faseAtual;
 
     public Tela() {
         Desenho.setCenario(this);
@@ -40,19 +36,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         this.setSize(Consts.RES * Consts.CELL_SIDE + getInsets().left + getInsets().right,
                     Consts.RES * Consts.CELL_SIDE + getInsets().top + getInsets().bottom);
         
-        carregarLevel(levelAtual);
-
-    }
-    
-    public void carregarLevel(int n) {
-        faseAtual = new ArrayList<>();
-        mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
-        
-        try {
-            new World(Consts.PATH + n +  "mapa.png", this); // Padrão: 1mapa.png, 2mapa.png, etc.
-        } catch (IOException ex) {
-            Logger.getLogger(Tela.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        faseAtual = new Fase(this, 1);
     }
     
     public void keyPressed (KeyEvent e){
@@ -64,34 +48,14 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         else if(e.getKeyCode() == KeyEvent.VK_D) hero.moveRight();
         
         if(e.getKeyCode() == KeyEvent.VK_N){
-            nextLevel();
+            faseAtual.proximaFase();
         }
         this.atualizaCamera();
-        this.setTitle("Level " + levelAtual + " -> Pos: " + hero.getPosicao().getColuna() + ", " + 
+        this.setTitle("Level " + faseAtual.getFase() + " -> Pos: " + hero.getPosicao().getColuna() + ", " + 
                       hero.getPosicao().getLinha());
     }
     
-    public void nextLevel() {
-        if (levelAtual < Consts.TOTAL_LEVEIS) {
-            levelAtual++;
-            carregarLevel(levelAtual);
-        } else {
-            // Jogo completado
-            System.out.println("Parabéns! Você completou todos os níveis!");
-        }
-    }
 
-    public void setTile(int linha, int coluna, Tile tile) {
-    if (linha >= 0 && linha < mapaBase.length && 
-        coluna >= 0 && coluna < mapaBase[0].length) {
-        mapaBase[linha][coluna] = tile;
-    }
-}
-
-
-    public Tile getTile(int linha, int coluna) {
-        return mapaBase[linha][coluna];
-    }
 
     public void setHero(Hero h) {
         this.hero = h;
@@ -108,10 +72,6 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     public int getCameraColuna() {
         return cameraColuna;
     }
-
-    public int getLevelAtual(){
-        return levelAtual;
-    }
     
     public boolean ehPosicaoValida(Posicao p) {
         // Verifica se está dentro do mundo
@@ -121,16 +81,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         }
 
         // Verifica se o tile é transponível
-        Tile t = getTile(p.getLinha(), p.getColuna());
+        Tile t = faseAtual.getTile(p.getLinha(), p.getColuna());
         return t == null || t.isTransponivel();
-    }
-
-    public void addPersonagem(Personagem umPersonagem) {
-        faseAtual.add(umPersonagem);
-    }
-
-    public void removePersonagem(Personagem umPersonagem) {
-        faseAtual.remove(umPersonagem);
     }
 
     public Graphics getGraphicsBuffer() {
@@ -138,6 +90,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     }
 
     public void paint(Graphics gOld) {
+        Tile[][] mapaBase = faseAtual.getMapaBase();
         Graphics g = this.getBufferStrategy().getDrawGraphics();
         g2 = g.create(getInsets().left, getInsets().top, getWidth() - getInsets().right, getHeight() - getInsets().top);
 
@@ -157,9 +110,9 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         }
 
         // Desenhar personagens
-        if (!faseAtual.isEmpty()) {
-            cj.desenhaTudo(faseAtual);
-            cj.processaTudo(faseAtual);
+        if (!faseAtual.estaVazia()) {
+            cj.desenhaTudo(faseAtual.getEntidades());
+            cj.processaTudo(faseAtual.getEntidades());
         }
 
         g.dispose();
