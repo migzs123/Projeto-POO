@@ -17,6 +17,7 @@ public class Fase {
        private int levelAtual;
        private ArrayList<Personagem> entidades;
        private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
+       private int tentativas;
        
        public Fase(Tela tela, int levelAtual){
            this.tela = tela;
@@ -26,6 +27,9 @@ public class Fase {
        
        
        public void carregarFase(int n) {
+        if(n == levelAtual){
+            tentativas++;
+        }
         entidades = new ArrayList<>();
         mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
         
@@ -38,6 +42,7 @@ public class Fase {
        
        public void proximaFase() {
         if (levelAtual < Consts.TOTAL_LEVEIS) {
+            tentativas=0;
             levelAtual++;
             this.carregarFase(levelAtual);
         } else {
@@ -104,6 +109,9 @@ public class Fase {
          return entidades;
     }
        
+    public int getTentativas(){
+        return tentativas;
+    }
        
         public void AdicionaEntidade(Personagem p){
            entidades.add(p);

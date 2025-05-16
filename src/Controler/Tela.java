@@ -4,13 +4,21 @@ import Modelo.*;
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
 import auxiliar.Posicao;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,6 +35,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     private int cameraColuna = 0;
     
     public Fase faseAtual;
+    
+    private Font pixelFont;
 
     public Tela() {
         Desenho.setCenario(this);
@@ -35,7 +45,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         this.addKeyListener(this);
         this.setSize(Consts.RES * Consts.CELL_SIDE + getInsets().left + getInsets().right,
                     Consts.RES * Consts.CELL_SIDE + getInsets().top + getInsets().bottom);
-        
+        carregarFontePixel();
         faseAtual = new Fase(this, 1);
     }
     
@@ -115,13 +125,80 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             cj.processaTudo(faseAtual.getEntidades());
         }
 
+        desenharHUD(g2);
+        
         g.dispose();
         g2.dispose();
         if (!getBufferStrategy().contentsLost()) {
             getBufferStrategy().show();
         }
     }
+    
+    private void desenharHUD(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
 
+        int larguraTela = getWidth();
+        int alturaTela = getHeight();
+        int alturaHUD = 60;
+        int yTextoTopo = 40;
+        int yTextoBase = alturaTela - 20; // Ajuste para ficar dentro do HUD inferior
+
+        g2d.setFont(pixelFont);
+        FontMetrics fm = g2d.getFontMetrics();
+
+        String textoFase = "Fase " + faseAtual.getFase();
+        String textoTentativas = "Tentativas: " + faseAtual.getTentativas();
+        String textoFrutas = "2/2";
+        String textoPontos = "Pontos " + 1000;
+
+        // === HUD SUPERIOR ===
+        g2d.setColor(new Color(0xFFDAF1FF));
+        g2d.fillRect(0, 0, larguraTela, alturaHUD);
+
+        g2d.setColor(new Color(0xFF0448A2)); // cor da borda
+        
+        g2d.setStroke(new BasicStroke(3));
+        g2d.drawRect(0, 0, larguraTela -1 , alturaHUD  -1); // borda superior
+        g2d.setStroke(new BasicStroke(1));
+        
+        g2d.setColor(new Color(0xFF0448A2));
+        g2d.drawString(textoFase, 20, yTextoTopo);
+
+        int larguraTentativas = fm.stringWidth(textoTentativas);
+        g2d.drawString(textoTentativas, larguraTela - larguraTentativas - 50, yTextoTopo);
+
+        // === HUD INFERIOR ===
+        g2d.setColor(new Color(0xFFDAF1FF));
+        g2d.fillRect(0, 690, larguraTela, alturaHUD);
+
+        g2d.setStroke(new BasicStroke(3));
+        g2d.setColor(new Color(0xFF0448A2)); // borda inferior
+        g2d.drawRect(0, 690, larguraTela, alturaHUD);
+        g2d.setStroke(new BasicStroke(1));
+
+        g2d.setColor(new Color(0xFF0448A2));
+        g2d.drawString(textoFrutas, 20, 730);
+
+        int larguraPontos = fm.stringWidth(textoPontos);
+        g2d.drawString(textoPontos, larguraTela - larguraPontos - 50, 730);
+    }
+
+
+    private void carregarFontePixel() {
+    try {
+        InputStream is = getClass().getResourceAsStream("/fonts/pixel2.ttf");
+        Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
+        pixelFont = baseFont.deriveFont(Font.PLAIN, 20f); // tamanho ajustável
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(baseFont);
+    } catch (Exception e) {
+        e.printStackTrace();
+        pixelFont = new Font("Monospaced", Font.PLAIN, 24); // fallback
+    }
+}
+    
+    
     public void atualizaCamera() {
         int linha = hero.getPosicao().getLinha();
         int coluna = hero.getPosicao().getColuna();
