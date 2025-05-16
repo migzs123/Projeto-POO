@@ -70,8 +70,8 @@ public class Fase {
             this.setTile(y, x, new Tile("ground.png", true));
         } else if (pixel == 0xFF000000) { // preto - parede
             this.setTile(y, x, new Tile("wall.png", false));
-        }else if (pixel == 0xFF404040) { // verde - saída do nível
-            this.setTile(y, x, new Tile("background.png", true)); // Tile especial de saída
+        }else if (pixel == 0xFF404040) { // cinza - backgorund
+            this.setTile(y, x, new Tile("background.png", false)); 
         } 
         else if (pixel == 0xFFFF0000) { // vermelho - herói
             Hero h = new Hero("hero.png");
