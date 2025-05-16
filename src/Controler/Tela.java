@@ -10,13 +10,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Tela extends javax.swing.JFrame implements MouseListener, KeyListener {
 
@@ -27,6 +22,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     private int cameraColuna = 0;
     
     public Fase faseAtual;
+    private final Set<Integer> teclasPressionadas = new HashSet<>();
 
     public Tela() {
         Desenho.setCenario(this);
@@ -39,20 +35,32 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         faseAtual = new Fase(this, 1);
     }
     
-    public void keyPressed (KeyEvent e){
-        if(hero == null) return;
-        
-        if(e.getKeyCode() == KeyEvent.VK_W) hero.moveUp();
-        else if(e.getKeyCode() == KeyEvent.VK_S) hero.moveDown();
-        else if(e.getKeyCode() == KeyEvent.VK_A) hero.moveLeft();
-        else if(e.getKeyCode() == KeyEvent.VK_D) hero.moveRight();
-        
-        if(e.getKeyCode() == KeyEvent.VK_N){
-            faseAtual.proximaFase();
+     @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
+
+        // Ignora se já está pressionada
+        if (teclasPressionadas.contains(key)) return;
+        teclasPressionadas.add(key);
+
+        if (hero == null) return;
+
+        switch (key) {
+            case KeyEvent.VK_W -> hero.moveUp();
+            case KeyEvent.VK_S -> hero.moveDown();
+            case KeyEvent.VK_A -> hero.moveLeft();
+            case KeyEvent.VK_D -> hero.moveRight();
+            case KeyEvent.VK_N -> faseAtual.proximaFase();
         }
+
         this.atualizaCamera();
-        this.setTitle("Level " + faseAtual.getFase() + " -> Pos: " + hero.getPosicao().getColuna() + ", " + 
-                      hero.getPosicao().getLinha());
+        this.setTitle("Level " + faseAtual.getFase() + " -> Pos: "
+                + hero.getPosicao().getColuna() + ", " + hero.getPosicao().getLinha());
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        teclasPressionadas.remove(e.getKeyCode());
     }
     
 
@@ -204,6 +212,5 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     public void keyTyped(KeyEvent e) {
     }
 
-    public void keyReleased(KeyEvent e) {
-    }
+    
 }

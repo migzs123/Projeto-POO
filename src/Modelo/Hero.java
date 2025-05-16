@@ -82,45 +82,66 @@
 
         public boolean moveUp() {
             this.iImage = upImage;
-            try {
-                faseAtual.setTile(this.pPosicao.getLinha(),this.pPosicao.getColuna() , new Tile("water.png", true, true));
-            } catch (IOException ex) {
-                Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+            int linhaAnterior = pPosicao.getLinha();
+            int colunaAnterior = pPosicao.getColuna();
+
+            if (super.moveUp() && validaPosicao()) {
+                try {
+                    faseAtual.setTile(linhaAnterior, colunaAnterior, new Tile("water.png", true, true));
+                } catch (IOException ex) {
+                    Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return true;
             }
-            if (super.moveUp()) return validaPosicao();
             return false;
-        }
+        }   
 
         public boolean moveDown() {
             this.iImage = downImage;
-            try {
-                faseAtual.setTile(this.pPosicao.getLinha(),this.pPosicao.getColuna() , new Tile("water.png", true, true));
-            } catch (IOException ex) {
-                Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            if (super.moveDown()) return validaPosicao();
-            return false;
-        }
+            int linhaAnterior = pPosicao.getLinha();
+            int colunaAnterior = pPosicao.getColuna();
 
-        public boolean moveRight() {
-            this.iImage = rightImage;
-            try {
-                faseAtual.setTile(this.pPosicao.getLinha(),this.pPosicao.getColuna() , new Tile("water.png", true, true));
-            } catch (IOException ex) {
-                Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+            if (super.moveDown() && validaPosicao()) {
+                try {
+                    faseAtual.setTile(linhaAnterior, colunaAnterior, new Tile("water.png", true, true));
+                } catch (IOException ex) {
+                    Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return true;
             }
-            if (super.moveRight()) return validaPosicao();
             return false;
         }
 
         public boolean moveLeft() {
             this.iImage = leftImage;
-            try {
-                faseAtual.setTile(this.pPosicao.getLinha(),this.pPosicao.getColuna() , new Tile("water.png", true, true));
-            } catch (IOException ex) {
-                Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+            int linhaAnterior = pPosicao.getLinha();
+            int colunaAnterior = pPosicao.getColuna();
+
+            if (super.moveLeft() && validaPosicao()) {
+                try {
+                    faseAtual.setTile(linhaAnterior, colunaAnterior, new Tile("water.png", true, true));
+                } catch (IOException ex) {
+                    Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return true;
             }
-            if (super.moveLeft()) return validaPosicao();
             return false;
         }
+
+        public boolean moveRight() {
+            this.iImage = rightImage;
+            int linhaAnterior = pPosicao.getLinha();
+            int colunaAnterior = pPosicao.getColuna();
+
+            if (super.moveRight() && validaPosicao()) {
+                try {
+                    faseAtual.setTile(linhaAnterior, colunaAnterior, new Tile("water.png", true, true));
+                } catch (IOException ex) {
+                    Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return true;
+            }
+            return false;
+        }
+
     }
