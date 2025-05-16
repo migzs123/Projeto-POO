@@ -35,7 +35,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         this.addKeyListener(this);
         this.setSize(Consts.RES * Consts.CELL_SIDE + getInsets().left + getInsets().right,
                     Consts.RES * Consts.CELL_SIDE + getInsets().top + getInsets().bottom);
-        
+        setLocationRelativeTo(null);
         faseAtual = new Fase(this, 1);
     }
     
