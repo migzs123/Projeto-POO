@@ -67,21 +67,23 @@ public class Fase {
        
        private void processaPixel(int pixel, int y, int x) throws IOException {
         if (pixel == 0xFFFFFFFF) { // branco - chão
-            this.setTile(y, x, new Tile(this.levelAtual + "ground.png", true));
+            this.setTile(y, x, new Tile("ground.png", true));
         } else if (pixel == 0xFF000000) { // preto - parede
-            this.setTile(y, x, new Tile(this.levelAtual +"wall.png", false));
-        } else if (pixel == 0xFFFF0000) { // vermelho - herói
+            this.setTile(y, x, new Tile("wall.png", false));
+        }else if (pixel == 0xFF404040) { // verde - saída do nível
+            this.setTile(y, x, new Tile("background.png", true)); // Tile especial de saída
+        } 
+        else if (pixel == 0xFFFF0000) { // vermelho - herói
             Hero h = new Hero("hero.png");
             h.setPosicao(y, x);
             tela.setHero(h);
             this.AdicionaEntidade(h);
-            this.setTile(y, x, new Tile(this.levelAtual + "ground.png", true));
+            this.setTile(y, x, new Tile("ground.png", true));
             tela.atualizaCamera();
         }
         // Adicione mais condições para outros elementos do jogo
-        else if (pixel == 0xFF00FF00) { // verde - saída do nível
-            this.setTile(y, x, new Tile("exit.png", true)); // Tile especial de saída
-        }
+        
+        
     }
        
     public void setTile(int linha, int coluna, Tile tile) {
