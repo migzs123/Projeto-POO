@@ -74,7 +74,7 @@ public class Fase {
             this.setTile(y, x, new Tile("background.png", false)); 
         } 
         else if (pixel == 0xFFFF0000) { // vermelho - herói
-            Hero h = new Hero("hero.png");
+            Hero h = new Hero("hero.png",this);
             h.setPosicao(y, x);
             tela.setHero(h);
             this.AdicionaEntidade(h);

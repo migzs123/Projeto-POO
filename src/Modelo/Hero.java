@@ -8,17 +8,22 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
 public class Hero extends Personagem implements Serializable{
     private ImageIcon upImage, downImage, leftImage, rightImage;
     private String baseName;
     
-    public Hero(String sNomeImagePNG) {
+    private Fase faseAtual;
+    
+    public Hero(String sNomeImagePNG, Fase faseAtual) {
         super(sNomeImagePNG);
         this.baseName = sNomeImagePNG.replace(".png", ""); // "Robbo"
         this.loadDirectionalSprites();
         this.iImage = downImage; // começa olhando para baixo
+        this.faseAtual = faseAtual;
     }
 
     private void loadDirectionalSprites() {
@@ -62,24 +67,44 @@ public class Hero extends Personagem implements Serializable{
 
     public boolean moveUp() {
         this.iImage = upImage;
+        try {
+            faseAtual.setTile(this.pPosicao.getLinha(),this.pPosicao.getColuna() , new Tile("water.png", false));
+        } catch (IOException ex) {
+            Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (super.moveUp()) return validaPosicao();
         return false;
     }
 
     public boolean moveDown() {
         this.iImage = downImage;
+        try {
+            faseAtual.setTile(this.pPosicao.getLinha(),this.pPosicao.getColuna() , new Tile("water.png", false));
+        } catch (IOException ex) {
+            Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (super.moveDown()) return validaPosicao();
         return false;
     }
 
     public boolean moveRight() {
         this.iImage = rightImage;
+        try {
+            faseAtual.setTile(this.pPosicao.getLinha(),this.pPosicao.getColuna() , new Tile("water.png", false));
+        } catch (IOException ex) {
+            Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (super.moveRight()) return validaPosicao();
         return false;
     }
 
     public boolean moveLeft() {
         this.iImage = leftImage;
+        try {
+            faseAtual.setTile(this.pPosicao.getLinha(),this.pPosicao.getColuna() , new Tile("water.png", false));
+        } catch (IOException ex) {
+            Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (super.moveLeft()) return validaPosicao();
         return false;
     }
