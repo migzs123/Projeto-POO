@@ -71,6 +71,11 @@
                 Desenho.acessoATelaDoJogo().faseAtual.carregarFase(faseAtual.getFase()); // reinicia a fase atual
                 return false;
             }
+            
+            if(tileAtual != null && tileAtual.isFim()){
+                faseAtual.proximaFase();
+                return false;
+            }
 
             return true;
         }
