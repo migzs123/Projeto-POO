@@ -1,16 +1,9 @@
-import Controler.Tela;
+import Modelo.MenuPrincipal;
 
 public class Main {
-
     public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                Tela tTela = new Tela();
-                tTela.setVisible(true);
-                tTela.createBufferStrategy(2);
-                tTela.go();
-            }
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            new MenuPrincipal(); // Inicia o menu
         });
     }
 }
-
