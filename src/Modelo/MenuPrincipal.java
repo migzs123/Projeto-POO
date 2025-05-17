@@ -7,52 +7,67 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class MenuPrincipal extends JFrame {
-
     public MenuPrincipal() {
         setTitle("Menu Principal");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(Consts.RES * Consts.CELL_SIDE + getInsets().left + getInsets().right,
                     Consts.RES * Consts.CELL_SIDE + getInsets().top + getInsets().bottom);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Centraliza na tela
+        setLocationRelativeTo(null);
         setResizable(false);
 
-        // Layout
-        JPanel panel = new JPanel();
-        panel.setBackground(new Color(0xFFDAF1FF));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        // Fundo com imagem
+        ImageIcon bgImage = new ImageIcon(getClass().getResource("/imgs/menu_background.png"));
+        JLabel background = new JLabel(bgImage);
+        background.setLayout(new GridBagLayout()); // permite centralizar os botões
+        setContentPane(background);
 
-        // Título
-        JLabel titulo = new JLabel("Passo Frágil");
-        titulo.setFont(new Font("Arial", Font.BOLD, 30));
-        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titulo.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        panel.add(titulo);
+        // Painel transparente para os botões
+        JPanel painelBotoes = new JPanel();
+        painelBotoes.setOpaque(false); // deixa o fundo transparente
+        painelBotoes.setLayout(new GridLayout(1, 3, 5, 20)); 
 
-        // Botão Jogar
-        JButton jogarBtn = new JButton("Novo Jogo");
-        jogarBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        jogarBtn.setFont(new Font("Arial", Font.PLAIN, 18));
-        jogarBtn.addActionListener(e -> iniciarJogo());
-        panel.add(jogarBtn);
+        JButton btnJogar = criarBotaoComImagem("newGameN.png", "newGameH.png");
 
-        // Botão Sair
-        JButton sairBtn = new JButton("Sair");
-        sairBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        sairBtn.setFont(new Font("Arial", Font.PLAIN, 18));
-        sairBtn.setMaximumSize(jogarBtn.getMaximumSize());
-        sairBtn.addActionListener(e -> System.exit(0));
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(sairBtn);
+        JButton btnCreditos = criarBotaoComImagem("CreditosN.png", "CreditosH.png");
+        JButton btnSair = criarBotaoComImagem("sairN.png", "sairH.png");
 
-        add(panel);
+        btnJogar.addActionListener(e -> iniciarJogo());
+        btnCreditos.addActionListener(e -> JOptionPane.showMessageDialog(this, "Feito por você :)"));
+        btnSair.addActionListener(e -> System.exit(0));
+
+        painelBotoes.add(btnJogar);
+        painelBotoes.add(btnCreditos);
+        painelBotoes.add(btnSair);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weighty = 1.0;
+        gbc.anchor = GridBagConstraints.PAGE_END; // ou SOUTH
+        background.add(painelBotoes, gbc);
+
         setVisible(true);
     }
 
     private void iniciarJogo() {
-        this.dispose(); // Fecha o menu
-        Tela tela = new Tela(); // Cria o jogo
+        dispose();
+        Tela tela = new Tela();
         tela.setVisible(true);
         tela.createBufferStrategy(2);
-        tela.go(); // Inicia o loop do jogo
+        tela.go();
     }
+    
+    private JButton criarBotaoComImagem(String normal, String hover) {
+        JButton botao = new JButton(new ImageIcon(getClass().getResource("/imgs/" + normal)));
+
+        botao.setRolloverIcon(new ImageIcon(getClass().getResource("/imgs/" + hover)));
+
+        botao.setContentAreaFilled(false); // tira o fundo cinza
+        botao.setBorderPainted(false);     // tira a borda padrão
+        botao.setFocusPainted(false);      // tira o contorno de foco
+        botao.setOpaque(false);            // total transparência
+
+        return botao;
+    }
+    
 }
