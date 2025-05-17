@@ -12,3 +12,7 @@
 build/built-jar.properties
 build/classes/Controler/Tela.class
 dist/PrototipoProjetoPOO.jar
+*.class
+*.properties
+*.jar
+nbproject/private/private.xml
