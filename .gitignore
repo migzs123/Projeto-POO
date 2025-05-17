@@ -1,4 +1,14 @@
+# Ignorar a pasta de build
 /build/
-.jar
-.properties
-.class
+
+# Ignorar arquivos .jar
+*.jar
+
+# Ignorar arquivos .properties
+*.properties
+
+# Ignorar arquivos .class (compilados do Java)
+*.class
+build/built-jar.properties
+build/classes/Controler/Tela.class
+dist/PrototipoProjetoPOO.jar
