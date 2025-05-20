@@ -17,8 +17,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,7 +34,6 @@ import java.util.Set;
 
 public class Tela extends javax.swing.JFrame implements MouseListener, KeyListener {
 
-    private Hero hero;
     private ControleDeJogo cj = new ControleDeJogo();
     private Graphics g2;
     private int cameraLinha = 0;
@@ -51,46 +54,30 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         carregarFontePixel();
         setLocationRelativeTo(null);
         faseAtual = new Fase(this, 1);
-    }
-    
-     @Override
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-
-        // Ignora se já está pressionada
-        if (teclasPressionadas.contains(key)) return;
-        teclasPressionadas.add(key);
-
-        if (hero == null) return;
-
-        switch (key) {
-            case KeyEvent.VK_W -> hero.moveUp();
-            case KeyEvent.VK_S -> hero.moveDown();
-            case KeyEvent.VK_A -> hero.moveLeft();
-            case KeyEvent.VK_D -> hero.moveRight();
-            case KeyEvent.VK_N -> faseAtual.proximaFase();
-        }
-
         this.atualizaCamera();
-        this.setTitle("Level " + faseAtual.getFase() + " -> Pos: "
-                + hero.getPosicao().getColuna() + ", " + hero.getPosicao().getLinha());
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        teclasPressionadas.remove(e.getKeyCode());
     }
     
-
-
-    public void setHero(Hero h) {
-        this.hero = h;
+    public void salvarJogo() {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("save.dat"))) {
+            out.writeObject(faseAtual);
+            System.out.println("Jogo salvo com sucesso.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
-    public Hero getHero() {
-        return this.hero;
+    
+    public void carregarJogo() {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("save.dat"))) {
+            faseAtual = (Fase) in.readObject();
+            faseAtual.setTela(this);
+            faseAtual.recarregarRecursos(); // exemplo: para reconfigurar imagens
+            this.atualizaCamera();
+            System.out.println("Jogo carregado com sucesso.");
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
-
+    
     public int getCameraLinha() {
         return cameraLinha;
     }
@@ -216,8 +203,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
     
     public void atualizaCamera() {
-        int linha = hero.getPosicao().getLinha();
-        int coluna = hero.getPosicao().getColuna();
+        int linha = faseAtual.getHero().getPosicao().getLinha();
+        int coluna = faseAtual.getHero().getPosicao().getColuna();
 
         cameraLinha = Math.max(0, Math.min(linha - Consts.RES / 2, Consts.MUNDO_ALTURA - Consts.RES));
         cameraColuna = Math.max(0, Math.min(coluna - Consts.RES / 2, Consts.MUNDO_LARGURA - Consts.RES));
@@ -247,7 +234,37 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         }
     }).start();
 }
+   
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
 
+        // Ignora se já está pressionada
+        if (teclasPressionadas.contains(key)) return;
+        teclasPressionadas.add(key);
+
+        if (faseAtual.getHero() == null) return;
+
+        switch (key) {
+            case KeyEvent.VK_W -> faseAtual.getHero().moveUp();
+            case KeyEvent.VK_S -> faseAtual.getHero().moveDown();
+            case KeyEvent.VK_A -> faseAtual.getHero().moveLeft();
+            case KeyEvent.VK_D -> faseAtual.getHero().moveRight();
+            case KeyEvent.VK_N -> faseAtual.proximaFase();
+            case KeyEvent.VK_G -> salvarJogo(); // G de gravar
+            case KeyEvent.VK_L -> carregarJogo(); // L de load
+        }
+
+        this.atualizaCamera();
+        this.setTitle("Level " + faseAtual.getFase() + " -> Pos: "
+                + faseAtual.getHero().getPosicao().getColuna() + ", " + faseAtual.getHero().getPosicao().getLinha());
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        teclasPressionadas.remove(e.getKeyCode());
+    }
+    
 
     public void mousePressed(MouseEvent e) {
     }

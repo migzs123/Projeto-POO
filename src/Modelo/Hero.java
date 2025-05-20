@@ -48,6 +48,12 @@
                 return this.iImage; // fallback: imagem padrão carregada pelo Personagem
             }
         }
+          
+          public void carregarImagem() {
+                loadDirectionalSprites();  // recarrega todas as imagens direcionais
+                this.iImage = downImage;   // define imagem padrão
+          }
+          
         public void voltaAUltimaPosicao() {
             this.pPosicao.volta();
         }

@@ -4,20 +4,25 @@ package Modelo;
 import Auxiliar.Consts;
 import Controler.Tela;
 import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 
-public class Fase {
-    
-       private Tela tela;
+public class Fase implements Serializable {
+     private static final long serialVersionUID = 1L;
+     
+       private transient Tela tela;
        private int levelAtual;
+       private Hero hero;
        private ArrayList<Personagem> entidades;
        private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
        private int tentativas;
+       private int pontos;
        
        public Fase(Tela tela, int levelAtual){
            this.tela = tela;
@@ -81,17 +86,28 @@ public class Fase {
             this.setTile(y, x, new Tile("end.png", true, 1)); 
         } 
         else if (pixel == 0xFFFF0000) { // vermelho - herói
-            Hero h = new Hero("hero.png",this);
-            h.setPosicao(y, x);
-            tela.setHero(h);
-            this.AdicionaEntidade(h);
+            hero = new Hero("hero.png",this);
+            hero.setPosicao(y, x);
+            this.AdicionaEntidade(hero);
             this.setTile(y, x, new Tile("ground.png", true));
-            tela.atualizaCamera();
         }
-        // Adicione mais condições para outros elementos do jogo
-        
-        
+        // Adicione mais condições para outros elementos do jogo   
     }
+       
+       public void recarregarRecursos() {
+            for (Personagem p : entidades) {
+                p.carregarImagem(); // Hero e outros devem implementar isso
+            }
+
+            // Recarrega imagens dos tiles
+            for (int i = 0; i < mapaBase.length; i++) {
+                for (int j = 0; j < mapaBase[i].length; j++) {
+                    if (mapaBase[i][j] != null) {
+                        mapaBase[i][j].carregarImagem();
+                    }
+                }
+            }
+        }
        
     public void setTile(int linha, int coluna, Tile tile) {
         if (linha >= 0 && linha < mapaBase.length && 
@@ -99,7 +115,7 @@ public class Fase {
             mapaBase[linha][coluna] = tile;
         }
     }
-    
+        
     public Tile getTile(int linha, int coluna) {
         return mapaBase[linha][coluna];
     }
@@ -113,23 +129,32 @@ public class Fase {
         return tentativas;
     }
        
-        public void AdicionaEntidade(Personagem p){
-           entidades.add(p);
-       }
-       
-       public void RemoveEntidade(Personagem p){
-           entidades.remove(p);
-       }
-       
-       public boolean estaVazia(){
-           return entidades.isEmpty();
-       }
-       
-       public int getFase(){
-           return levelAtual;
-       }
-       
-       public Tile[][] getMapaBase(){
-           return mapaBase;
-       }
+    public void AdicionaEntidade(Personagem p){
+       entidades.add(p);
+    }
+
+   public void RemoveEntidade(Personagem p){
+       entidades.remove(p);
+    }
+
+   public boolean estaVazia(){
+       return entidades.isEmpty();
+    }
+
+   public int getFase(){
+       return levelAtual;
+    }
+   
+   public Tile[][] getMapaBase(){
+       return mapaBase;
+    }
+   
+    public void setTela(Tela tela) {
+        this.tela = tela;
+    }
+    
+    public Hero getHero(){
+        return hero;
+    }
+   
 }
