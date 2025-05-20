@@ -23,12 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,7 +37,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
     private Font pixelFont;
     private final Set<Integer> teclasPressionadas = new HashSet<>();
-
+    
+/*------------CONSTRUTOR------------*/
     public Tela() {
         Desenho.setCenario(this);
         initComponents();
@@ -65,6 +60,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         });
     }
     
+/*------------SALVAMENTO------------*/
     public void salvarJogo() {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("save.dat"))) {
             out.writeObject(faseAtual);
@@ -91,6 +87,15 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         return saveFile.exists() && saveFile.length() > 0;
     }
     
+/*------------CAMERA------------*/
+    public void atualizaCamera() {
+        int linha = faseAtual.getHero().getPosicao().getLinha();
+        int coluna = faseAtual.getHero().getPosicao().getColuna();
+
+        cameraLinha = Math.max(0, Math.min(linha - Consts.RES / 2, Consts.MUNDO_ALTURA - Consts.RES));
+        cameraColuna = Math.max(0, Math.min(coluna - Consts.RES / 2, Consts.MUNDO_LARGURA - Consts.RES));
+    }
+    
     public int getCameraLinha() {
         return cameraLinha;
     }
@@ -99,6 +104,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         return cameraColuna;
     }
     
+/*------------POSIÇÕES------------*/    
     public boolean ehPosicaoValida(Posicao p) {
         // Verifica se está dentro do mundo
         if (p.getLinha() < 0 || p.getColuna() < 0 ||
@@ -111,6 +117,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         return t == null || t.isTransponivel();
     }
 
+/*------------GRAFICOS------------*/
     public Graphics getGraphicsBuffer() {
         return g2;
     }
@@ -202,52 +209,44 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
 
     private void carregarFontePixel() {
-    try {
-        InputStream is = getClass().getResourceAsStream("/fonts/pixel2.ttf");
-        Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
-        pixelFont = baseFont.deriveFont(Font.PLAIN, 20f); // tamanho ajustável
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        ge.registerFont(baseFont);
-    } catch (Exception e) {
-        e.printStackTrace();
-        pixelFont = new Font("Monospaced", Font.PLAIN, 24); // fallback
-    }
-}
-    
-    
-    public void atualizaCamera() {
-        int linha = faseAtual.getHero().getPosicao().getLinha();
-        int coluna = faseAtual.getHero().getPosicao().getColuna();
-
-        cameraLinha = Math.max(0, Math.min(linha - Consts.RES / 2, Consts.MUNDO_ALTURA - Consts.RES));
-        cameraColuna = Math.max(0, Math.min(coluna - Consts.RES / 2, Consts.MUNDO_LARGURA - Consts.RES));
-    }
-
-    public void go() {
-    new Thread(() -> {
-        long lastTime = System.nanoTime();
-        double nsPerTick = 1_000_000_000.0 / 60.0; // 60 FPS alvo
-        double delta = 0;
-
-        while (true) {
-            long now = System.nanoTime();
-            delta += (now - lastTime) / nsPerTick;
-            lastTime = now;
-
-            while (delta >= 1) {
-                repaint(); // Renderização
-                delta--;
-            }
-
-            try {
-                Thread.sleep(1); // Evita consumo excessivo da CPU
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            InputStream is = getClass().getResourceAsStream("/fonts/pixel2.ttf");
+            Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
+            pixelFont = baseFont.deriveFont(Font.PLAIN, 20f); // tamanho ajustável
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(baseFont);
+        } catch (Exception e) {
+            e.printStackTrace();
+            pixelFont = new Font("Monospaced", Font.PLAIN, 24); // fallback
         }
+    }
+    
+    public void go() {
+        new Thread(() -> {
+            long lastTime = System.nanoTime();
+            double nsPerTick = 1_000_000_000.0 / 60.0; // 60 FPS alvo
+            double delta = 0;
+
+            while (true) {
+                long now = System.nanoTime();
+                delta += (now - lastTime) / nsPerTick;
+                lastTime = now;
+
+                while (delta >= 1) {
+                    repaint(); // Renderização
+                    delta--;
+                }
+
+                try {
+                    Thread.sleep(1); // Evita consumo excessivo da CPU
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
     }).start();
 }
-   
+  
+/*------------INPUTS------------*/
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
@@ -278,8 +277,27 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         teclasPressionadas.remove(e.getKeyCode());
     }
     
-
     public void mousePressed(MouseEvent e) {
+    }
+    public void mouseMoved(MouseEvent e) {
+    }
+
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
+
+    public void mouseDragged(MouseEvent e) {
+    }
+
+    public void keyTyped(KeyEvent e) {
     }
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -306,26 +324,4 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
 
-    public void mouseMoved(MouseEvent e) {
-    }
-
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    public void mouseExited(MouseEvent e) {
-    }
-
-    public void mouseDragged(MouseEvent e) {
-    }
-
-    public void keyTyped(KeyEvent e) {
-    }
-
-    
 }

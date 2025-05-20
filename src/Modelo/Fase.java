@@ -104,7 +104,7 @@ public class Fase implements Serializable {
             for (int i = 0; i < mapaBase.length; i++) {
                 for (int j = 0; j < mapaBase[i].length; j++) {
                     if (mapaBase[i][j] != null) {
-                        mapaBase[i][j].carregarImagem();
+                        mapaBase[i][j].recarregarImagem();
                     }
                 }
             }
