@@ -28,6 +28,7 @@ public class Fase implements Serializable {
            this.tela = tela;
            this.levelAtual = levelAtual;
            this.carregarFase(levelAtual);
+           pontos = 0;
        }
        
        
@@ -155,6 +156,14 @@ public class Fase implements Serializable {
     
     public Hero getHero(){
         return hero;
+    }
+    
+    public int getPontos(){
+        return this.pontos;
+    }
+    
+    public void adicionarPontos(int qtd){
+        this.pontos += qtd;
     }
    
 }

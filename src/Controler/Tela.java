@@ -55,6 +55,14 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         setLocationRelativeTo(null);
         faseAtual = new Fase(this, 1);
         this.atualizaCamera();
+        
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+                salvarJogo(); 
+                System.out.println("Salvando antes de fechar...");
+            }
+        });
     }
     
     public void salvarJogo() {
@@ -72,10 +80,15 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             faseAtual.setTela(this);
             faseAtual.recarregarRecursos(); // exemplo: para reconfigurar imagens
             this.atualizaCamera();
-            System.out.println("Jogo carregado com sucesso.");
+            System.out.println("Jogo carregado com sucesso."); 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+     
+    public static boolean existeSave() {
+        java.io.File saveFile = new java.io.File("save.dat");
+        return saveFile.exists() && saveFile.length() > 0;
     }
     
     public int getCameraLinha() {
@@ -153,7 +166,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         String textoFase = "Fase " + faseAtual.getFase();
         String textoTentativas = "Tentativas: " + faseAtual.getTentativas();
         String textoFrutas = "2/2";
-        String textoPontos = "Pontos " + 1000;
+        String textoPontos = "Pontos " + faseAtual.getPontos();
 
         // === HUD SUPERIOR ===
         g2d.setColor(new Color(0xFFDAF1FF));
