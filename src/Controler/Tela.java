@@ -17,20 +17,17 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Tela extends javax.swing.JFrame implements MouseListener, KeyListener {
 
-    private Hero hero;
     private ControleDeJogo cj = new ControleDeJogo();
     private Graphics g2;
     private int cameraLinha = 0;
@@ -40,7 +37,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
     private Font pixelFont;
     private final Set<Integer> teclasPressionadas = new HashSet<>();
-
+    
+/*------------CONSTRUTOR------------*/
     public Tela() {
         Desenho.setCenario(this);
         initComponents();
@@ -51,46 +49,53 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         carregarFontePixel();
         setLocationRelativeTo(null);
         faseAtual = new Fase(this, 1);
-    }
-    
-     @Override
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-
-        // Ignora se já está pressionada
-        if (teclasPressionadas.contains(key)) return;
-        teclasPressionadas.add(key);
-
-        if (hero == null) return;
-
-        switch (key) {
-            case KeyEvent.VK_W -> hero.moveUp();
-            case KeyEvent.VK_S -> hero.moveDown();
-            case KeyEvent.VK_A -> hero.moveLeft();
-            case KeyEvent.VK_D -> hero.moveRight();
-            case KeyEvent.VK_N -> faseAtual.proximaFase();
-        }
-
         this.atualizaCamera();
-        this.setTitle("Level " + faseAtual.getFase() + " -> Pos: "
-                + hero.getPosicao().getColuna() + ", " + hero.getPosicao().getLinha());
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        teclasPressionadas.remove(e.getKeyCode());
+        
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+                salvarJogo(); 
+                System.out.println("Salvando antes de fechar...");
+            }
+        });
     }
     
-
-
-    public void setHero(Hero h) {
-        this.hero = h;
+/*------------SALVAMENTO------------*/
+    public void salvarJogo() {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("save.dat"))) {
+            out.writeObject(faseAtual);
+            System.out.println("Jogo salvo com sucesso.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
-    public Hero getHero() {
-        return this.hero;
+    
+    public void carregarJogo() {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("save.dat"))) {
+            faseAtual = (Fase) in.readObject();
+            faseAtual.setTela(this);
+            faseAtual.recarregarRecursos(); // exemplo: para reconfigurar imagens
+            this.atualizaCamera();
+            System.out.println("Jogo carregado com sucesso."); 
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
+     
+    public static boolean existeSave() {
+        java.io.File saveFile = new java.io.File("save.dat");
+        return saveFile.exists() && saveFile.length() > 0;
+    }
+    
+/*------------CAMERA------------*/
+    public void atualizaCamera() {
+        int linha = faseAtual.getHero().getPosicao().getLinha();
+        int coluna = faseAtual.getHero().getPosicao().getColuna();
 
+        cameraLinha = Math.max(0, Math.min(linha - Consts.RES / 2, Consts.MUNDO_ALTURA - Consts.RES));
+        cameraColuna = Math.max(0, Math.min(coluna - Consts.RES / 2, Consts.MUNDO_LARGURA - Consts.RES));
+    }
+    
     public int getCameraLinha() {
         return cameraLinha;
     }
@@ -99,6 +104,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         return cameraColuna;
     }
     
+/*------------POSIÇÕES------------*/    
     public boolean ehPosicaoValida(Posicao p) {
         // Verifica se está dentro do mundo
         if (p.getLinha() < 0 || p.getColuna() < 0 ||
@@ -111,6 +117,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         return t == null || t.isTransponivel();
     }
 
+/*------------GRAFICOS------------*/
     public Graphics getGraphicsBuffer() {
         return g2;
     }
@@ -166,7 +173,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         String textoFase = "Fase " + faseAtual.getFase();
         String textoTentativas = "Tentativas: " + faseAtual.getTentativas();
         String textoFrutas = "2/2";
-        String textoPontos = "Pontos " + 1000;
+        String textoPontos = "Pontos " + faseAtual.getPontos();
 
         // === HUD SUPERIOR ===
         g2d.setColor(new Color(0xFFDAF1FF));
@@ -202,54 +209,95 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
 
     private void carregarFontePixel() {
-    try {
-        InputStream is = getClass().getResourceAsStream("/fonts/pixel2.ttf");
-        Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
-        pixelFont = baseFont.deriveFont(Font.PLAIN, 20f); // tamanho ajustável
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        ge.registerFont(baseFont);
-    } catch (Exception e) {
-        e.printStackTrace();
-        pixelFont = new Font("Monospaced", Font.PLAIN, 24); // fallback
-    }
-}
-    
-    
-    public void atualizaCamera() {
-        int linha = hero.getPosicao().getLinha();
-        int coluna = hero.getPosicao().getColuna();
-
-        cameraLinha = Math.max(0, Math.min(linha - Consts.RES / 2, Consts.MUNDO_ALTURA - Consts.RES));
-        cameraColuna = Math.max(0, Math.min(coluna - Consts.RES / 2, Consts.MUNDO_LARGURA - Consts.RES));
-    }
-
-    public void go() {
-    new Thread(() -> {
-        long lastTime = System.nanoTime();
-        double nsPerTick = 1_000_000_000.0 / 60.0; // 60 FPS alvo
-        double delta = 0;
-
-        while (true) {
-            long now = System.nanoTime();
-            delta += (now - lastTime) / nsPerTick;
-            lastTime = now;
-
-            while (delta >= 1) {
-                repaint(); // Renderização
-                delta--;
-            }
-
-            try {
-                Thread.sleep(1); // Evita consumo excessivo da CPU
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            InputStream is = getClass().getResourceAsStream("/fonts/pixel2.ttf");
+            Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
+            pixelFont = baseFont.deriveFont(Font.PLAIN, 20f); // tamanho ajustável
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(baseFont);
+        } catch (Exception e) {
+            e.printStackTrace();
+            pixelFont = new Font("Monospaced", Font.PLAIN, 24); // fallback
         }
+    }
+    
+    public void go() {
+        new Thread(() -> {
+            long lastTime = System.nanoTime();
+            double nsPerTick = 1_000_000_000.0 / 60.0; // 60 FPS alvo
+            double delta = 0;
+
+            while (true) {
+                long now = System.nanoTime();
+                delta += (now - lastTime) / nsPerTick;
+                lastTime = now;
+
+                while (delta >= 1) {
+                    repaint(); // Renderização
+                    delta--;
+                }
+
+                try {
+                    Thread.sleep(1); // Evita consumo excessivo da CPU
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
     }).start();
 }
+  
+/*------------INPUTS------------*/
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
 
+        // Ignora se já está pressionada
+        if (teclasPressionadas.contains(key)) return;
+        teclasPressionadas.add(key);
 
+        if (faseAtual.getHero() == null) return;
+
+        switch (key) {
+            case KeyEvent.VK_W -> faseAtual.getHero().moveUp();
+            case KeyEvent.VK_S -> faseAtual.getHero().moveDown();
+            case KeyEvent.VK_A -> faseAtual.getHero().moveLeft();
+            case KeyEvent.VK_D -> faseAtual.getHero().moveRight();
+            case KeyEvent.VK_N -> faseAtual.proximaFase();
+            case KeyEvent.VK_G -> salvarJogo(); // G de gravar
+            case KeyEvent.VK_L -> carregarJogo(); // L de load
+        }
+
+        this.atualizaCamera();
+        this.setTitle("Level " + faseAtual.getFase() + " -> Pos: "
+                + faseAtual.getHero().getPosicao().getColuna() + ", " + faseAtual.getHero().getPosicao().getLinha());
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        teclasPressionadas.remove(e.getKeyCode());
+    }
+    
     public void mousePressed(MouseEvent e) {
+    }
+    public void mouseMoved(MouseEvent e) {
+    }
+
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
+
+    public void mouseDragged(MouseEvent e) {
+    }
+
+    public void keyTyped(KeyEvent e) {
     }
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -276,26 +324,4 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
 
-    public void mouseMoved(MouseEvent e) {
-    }
-
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    public void mouseExited(MouseEvent e) {
-    }
-
-    public void mouseDragged(MouseEvent e) {
-    }
-
-    public void keyTyped(KeyEvent e) {
-    }
-
-    
 }

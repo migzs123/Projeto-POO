@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 public abstract class Personagem implements Serializable {
 
     protected ImageIcon iImage;
+    protected String nomeImagem;
     protected Posicao pPosicao;
     protected boolean bTransponivel; /*Pode passar por cima?*/
     protected boolean bMortal;       /*Se encostar, morre?*/
@@ -30,12 +31,13 @@ public abstract class Personagem implements Serializable {
         this.pPosicao = new Posicao(1, 1);
         this.bTransponivel = true;
         this.bMortal = false;
+        this.nomeImagem = sNomeImagePNG;
         
         try {
             // Carrega a imagem usando o mesmo padrão da classe Tile
-            URL imgURL = getClass().getResource("/imgs/" + sNomeImagePNG);
+            URL imgURL = getClass().getResource("/imgs/" + nomeImagem);
             if (imgURL == null) {
-                throw new IOException("Imagem não encontrada: /imgs/" + sNomeImagePNG);
+                throw new IOException("Imagem não encontrada: /imgs/" + nomeImagem);
             }
             
             // Mantém o mesmo processo de redimensionamento original
@@ -57,6 +59,14 @@ public abstract class Personagem implements Serializable {
         }
     }
 
+    public void carregarImagem(){
+        try{
+            this.iImage = new ImageIcon(getClass().getResource("/imgs/" + nomeImagem));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    
     public Posicao getPosicao() {
         /*TODO: Retirar este método para que objetos externos nao possam operar
          diretamente sobre a posição do Personagem*/

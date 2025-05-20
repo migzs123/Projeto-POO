@@ -15,27 +15,34 @@ public class MenuPrincipal extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Fundo com imagem
         ImageIcon bgImage = new ImageIcon(getClass().getResource("/imgs/menu_background.png"));
         JLabel background = new JLabel(bgImage);
-        background.setLayout(new GridBagLayout()); // permite centralizar os botões
+        background.setLayout(new GridBagLayout());
         setContentPane(background);
 
-        // Painel transparente para os botões
         JPanel painelBotoes = new JPanel();
-        painelBotoes.setOpaque(false); // deixa o fundo transparente
-        painelBotoes.setLayout(new GridLayout(1, 3, 5, 20)); 
+        painelBotoes.setOpaque(false);
+        painelBotoes.setLayout(new GridLayout(1, 3, 5, 20));
 
-        JButton btnJogar = criarBotaoComImagem("newGameN.png", "newGameH.png");
+        // Verifica se há um save
+        boolean temSave = Tela.existeSave();
+
+        JButton btnJogarOuContinuar;
+        if (temSave) {
+            btnJogarOuContinuar = criarBotaoComImagem("continuarN.png", "continuarH.png");
+            btnJogarOuContinuar.addActionListener(e -> carregarJogo());
+        } else {
+            btnJogarOuContinuar = criarBotaoComImagem("newGameN.png", "newGameH.png");
+            btnJogarOuContinuar.addActionListener(e -> iniciarJogo());
+        }
 
         JButton btnCreditos = criarBotaoComImagem("CreditosN.png", "CreditosH.png");
         JButton btnSair = criarBotaoComImagem("sairN.png", "sairH.png");
 
-        btnJogar.addActionListener(e -> iniciarJogo());
         btnCreditos.addActionListener(e -> JOptionPane.showMessageDialog(this, "Feito por você :)"));
         btnSair.addActionListener(e -> System.exit(0));
 
-        painelBotoes.add(btnJogar);
+        painelBotoes.add(btnJogarOuContinuar);
         painelBotoes.add(btnCreditos);
         painelBotoes.add(btnSair);
 
@@ -43,7 +50,7 @@ public class MenuPrincipal extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weighty = 1.0;
-        gbc.anchor = GridBagConstraints.PAGE_END; // ou SOUTH
+        gbc.anchor = GridBagConstraints.PAGE_END;
         background.add(painelBotoes, gbc);
 
         setVisible(true);
@@ -56,18 +63,24 @@ public class MenuPrincipal extends JFrame {
         tela.createBufferStrategy(2);
         tela.go();
     }
-    
+
+    private void carregarJogo() {
+        dispose();
+        Tela tela = new Tela();
+        tela.carregarJogo(); // << carrega save
+        tela.setVisible(true);
+        tela.createBufferStrategy(2);
+        tela.go();
+    }
+
     private JButton criarBotaoComImagem(String normal, String hover) {
         JButton botao = new JButton(new ImageIcon(getClass().getResource("/imgs/" + normal)));
-
         botao.setRolloverIcon(new ImageIcon(getClass().getResource("/imgs/" + hover)));
-
-        botao.setContentAreaFilled(false); // tira o fundo cinza
-        botao.setBorderPainted(false);     // tira a borda padrão
-        botao.setFocusPainted(false);      // tira o contorno de foco
-        botao.setOpaque(false);            // total transparência
-
+        botao.setContentAreaFilled(false);
+        botao.setBorderPainted(false);
+        botao.setFocusPainted(false);
+        botao.setOpaque(false);
         return botao;
     }
-    
 }
+
