@@ -1,6 +1,5 @@
 package Controler;
 
-import Modelo.Chaser;
 import Modelo.Personagem;
 import Modelo.Hero;
 import auxiliar.Posicao;
@@ -24,12 +23,6 @@ public class ControleDeJogo {
                     if (pIesimoPersonagem.isbMortal())
                     umaFase.remove(pIesimoPersonagem);
                 }
-            }
-        }
-        for (int i = 1; i < umaFase.size(); i++) {
-            pIesimoPersonagem = umaFase.get(i);
-            if (pIesimoPersonagem instanceof Chaser) {
-                ((Chaser) pIesimoPersonagem).computeDirection(hero.getPosicao());
             }
         }
     }
