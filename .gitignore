@@ -17,3 +17,4 @@ dist/PrototipoProjetoPOO.jar
 *.jar
 nbproject/private/private.xml
 save.dat
+/nbproject/private/
