@@ -12,59 +12,39 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
-public class Hero extends Personagem implements Serializable{
+public class Hero extends Personagem implements Serializable {
     private ImageIcon upImage, downImage, leftImage, rightImage;
     private String baseName;
-
     private Fase faseAtual;
 
-/*------------CONSTRUTOR------------*/
     public Hero(String sNomeImagePNG, Fase faseAtual) {
         super(sNomeImagePNG);
-        this.baseName = sNomeImagePNG.replace(".png", ""); // "Robbo"
-        this.loadDirectionalSprites();
-        this.iImage = downImage; // começa olhando para baixo
+        this.baseName = sNomeImagePNG.replace(".png", "");
         this.faseAtual = faseAtual;
+        this.carregarSprites();
+        this.iImage = downImage;
     }
 
-/*------------SPRITES------------*/
-    private void loadDirectionalSprites() {
+    @Override
+    public void carregarSprites() {
         upImage = carregarImagem(baseName + "_up.png");
         downImage = carregarImagem(baseName + "_down.png");
         leftImage = carregarImagem(baseName + "_left.png");
         rightImage = carregarImagem(baseName + "_right.png");
     }
 
-      private ImageIcon carregarImagem(String nomeImagem) {
-        try {
-            URL imgURL = getClass().getResource("/imgs/" + nomeImagem);
-            if (imgURL == null) throw new IOException("Imagem não encontrada: " + nomeImagem);
-            Image img = new ImageIcon(imgURL).getImage();
-            BufferedImage bi = new BufferedImage(Consts.CELL_SIDE, Consts.CELL_SIDE, BufferedImage.TYPE_INT_ARGB);
-            Graphics g = bi.createGraphics();
-            g.drawImage(img, 0, 0, Consts.CELL_SIDE, Consts.CELL_SIDE, null);
-            g.dispose();
-            return new ImageIcon(bi);
-        } catch (IOException ex) {
-            System.out.println("Erro ao carregar sprite: " + nomeImagem);
-            return this.iImage; // fallback: imagem padrão carregada pelo Personagem
-        }
+    @Override
+    public void carregarImagem() {
+        carregarSprites();
+        this.iImage = downImage;
     }
 
-      public void carregarImagem() {
-            loadDirectionalSprites();  // recarrega todas as imagens direcionais
-            this.iImage = downImage;   // define imagem padrão
-      }
-
-      
-/*------------POSIÇÃO------------*/
     public void voltaAUltimaPosicao() {
         this.pPosicao.volta();
     }
 
     public boolean setPosicao(int linha, int coluna) {
         return this.pPosicao.setPosicao(linha, coluna);
-
     }
 
     private boolean validaPosicao() {
@@ -73,24 +53,21 @@ public class Hero extends Personagem implements Serializable{
             return false;
         }
 
-        // Checa se a nova posição é mortal
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
         if (tileAtual != null && tileAtual.isMortal()) {
             System.out.println("GAME OVER: O herói caiu na água gelada!");
-            // aqui você pode reiniciar a fase ou encerrar o jogo
-            Desenho.acessoATelaDoJogo().faseAtual.carregarFase(faseAtual.getFase()); // reinicia a fase atual
+            Desenho.acessoATelaDoJogo().faseAtual.carregarFase(faseAtual.getFase());
             return false;
         }
 
-        if(tileAtual != null && tileAtual.isFim()){
+        if (tileAtual != null && tileAtual.isFim()) {
             faseAtual.proximaFase();
             return false;
         }
 
         return true;
     }
-    
-/*------------MOVIMENTAÇÃO------------*/
+
     public boolean moveUp() {
         this.iImage = upImage;
         int linhaAnterior = pPosicao.getLinha();
@@ -105,7 +82,7 @@ public class Hero extends Personagem implements Serializable{
             return true;
         }
         return false;
-    }   
+    }
 
     public boolean moveDown() {
         this.iImage = downImage;
@@ -154,5 +131,4 @@ public class Hero extends Personagem implements Serializable{
         }
         return false;
     }
-
 }

@@ -4,40 +4,59 @@ import Modelo.Personagem;
 import Modelo.Hero;
 import auxiliar.Posicao;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class ControleDeJogo {
     
-    public void desenhaTudo(ArrayList<Personagem> e) {
-        for (int i = 0; i < e.size(); i++) {
-            e.get(i).autoDesenho();
+    public void desenhaTudo(ArrayList<Personagem> entidades) {
+        for (Personagem p : entidades) {
+            p.autoDesenho();
         }
     }
-    
-    public void processaTudo(ArrayList<Personagem> umaFase) {
-        Hero hero = (Hero) umaFase.get(0);
-        Personagem pIesimoPersonagem;
-        for (int i = 1; i < umaFase.size(); i++) {
-            pIesimoPersonagem = umaFase.get(i);
-            if (hero.getPosicao().igual(pIesimoPersonagem.getPosicao())) {
-                if (pIesimoPersonagem.isbTransponivel()) /*TO-DO: verificar se o personagem eh mortal antes de retirar*/ {
-                    if (pIesimoPersonagem.isbMortal())
-                    umaFase.remove(pIesimoPersonagem);
+
+    public void processaTudo(ArrayList<Personagem> entidades) {
+        Hero hero = null;
+
+        // Encontra o herói
+        for (Personagem p : entidades) {
+            if (p instanceof Hero) {
+                hero = (Hero) p;
+                break;
+            }
+        }
+
+        if (hero == null) return; // Nenhum herói presente
+
+        Posicao posHero = hero.getPosicao();
+
+        Iterator<Personagem> it = entidades.iterator();
+        while (it.hasNext()) {
+            Personagem p = it.next();
+
+            // Ignora o próprio herói
+            if (p == hero) continue;
+
+            // Verifica colisão
+            if (posHero.igual(p.getPosicao())) {
+                if (p.isbTransponivel()) {
+                    if (p.isbMortal()) {
+                        it.remove(); // Remove a entidade mortal
+                    }
                 }
             }
         }
     }
 
-    /*Retorna true se a posicao p é válida para Hero com relacao a todos os personagens no array*/
-    public boolean ehPosicaoValida(ArrayList<Personagem> umaFase, Posicao p) {
-        Personagem pIesimoPersonagem;
-        for (int i = 1; i < umaFase.size(); i++) {
-            pIesimoPersonagem = umaFase.get(i);
-            if (!pIesimoPersonagem.isbTransponivel()) {
-                if (pIesimoPersonagem.getPosicao().igual(p)) {
+    /*Retorna true se a posicao p é válida para o herói com relação a outros personagens*/
+    public boolean ehPosicaoValida(ArrayList<Personagem> entidades, Posicao p) {
+        for (Personagem personagem : entidades) {
+            if (!personagem.isbTransponivel()) {
+                if (personagem.getPosicao().igual(p)) {
                     return false;
                 }
             }
         }
         return true;
     }
+
 }

@@ -2,7 +2,6 @@ package Modelo;
 
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
-import Controler.Tela;
 import auxiliar.Posicao;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -12,16 +11,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 public abstract class Personagem implements Serializable {
 
     protected ImageIcon iImage;
     protected String nomeImagem;
     protected Posicao pPosicao;
-    protected boolean bTransponivel; /*Pode passar por cima?*/
-    protected boolean bMortal;       /*Se encostar, morre?*/
+    protected boolean bTransponivel;
+    protected boolean bMortal;
 
     public boolean isbMortal() {
         return bMortal;
@@ -32,24 +29,23 @@ public abstract class Personagem implements Serializable {
         this.bTransponivel = true;
         this.bMortal = false;
         this.nomeImagem = sNomeImagePNG;
-        
+        carregarImagem(); // carrega a imagem padrão
+    }
+
+    public void carregarImagem() {
         try {
-            // Carrega a imagem usando o mesmo padrão da classe Tile
             URL imgURL = getClass().getResource("/imgs/" + nomeImagem);
             if (imgURL == null) {
                 throw new IOException("Imagem não encontrada: /imgs/" + nomeImagem);
             }
-            
-            // Mantém o mesmo processo de redimensionamento original
             Image img = new ImageIcon(imgURL).getImage();
             BufferedImage bi = new BufferedImage(Consts.CELL_SIDE, Consts.CELL_SIDE, BufferedImage.TYPE_INT_ARGB);
             Graphics g = bi.createGraphics();
             g.drawImage(img, 0, 0, Consts.CELL_SIDE, Consts.CELL_SIDE, null);
+            g.dispose();
             iImage = new ImageIcon(bi);
-            
         } catch (IOException ex) {
             System.out.println("Erro ao carregar imagem: " + ex.getMessage());
-            // Fallback visual (cria quadrado vermelho)
             BufferedImage bi = new BufferedImage(Consts.CELL_SIDE, Consts.CELL_SIDE, BufferedImage.TYPE_INT_ARGB);
             Graphics g = bi.createGraphics();
             g.setColor(java.awt.Color.RED);
@@ -59,17 +55,25 @@ public abstract class Personagem implements Serializable {
         }
     }
 
-    public void carregarImagem(){
-        try{
-            this.iImage = new ImageIcon(getClass().getResource("/imgs/" + nomeImagem));
-        }catch (Exception e){
-            e.printStackTrace();
+    protected abstract void carregarSprites();
+
+    protected ImageIcon carregarImagem(String nomeImagem) {
+        try {
+            URL imgURL = getClass().getResource("/imgs/" + nomeImagem);
+            if (imgURL == null) throw new IOException("Imagem não encontrada: " + nomeImagem);
+            Image img = new ImageIcon(imgURL).getImage();
+            BufferedImage bi = new BufferedImage(Consts.CELL_SIDE, Consts.CELL_SIDE, BufferedImage.TYPE_INT_ARGB);
+            Graphics g = bi.createGraphics();
+            g.drawImage(img, 0, 0, Consts.CELL_SIDE, Consts.CELL_SIDE, null);
+            g.dispose();
+            return new ImageIcon(bi);
+        } catch (IOException ex) {
+            System.out.println("Erro ao carregar sprite: " + nomeImagem);
+            return this.iImage; // fallback
         }
     }
-    
+
     public Posicao getPosicao() {
-        /*TODO: Retirar este método para que objetos externos nao possam operar
-         diretamente sobre a posição do Personagem*/
         return pPosicao;
     }
 
