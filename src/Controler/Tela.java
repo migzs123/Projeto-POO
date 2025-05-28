@@ -172,7 +172,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         String textoFase = "Fase " + faseAtual.getFase();
         String textoTentativas = "Tentativas: " + faseAtual.getTentativas();
-        String textoFrutas = "2/2";
+        String textoFrutas = faseAtual.getComidas() + "/" + faseAtual.getMaxComidas();
         String textoPontos = "Pontos " + faseAtual.getPontos();
 
         // === HUD SUPERIOR ===
@@ -265,6 +265,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             case KeyEvent.VK_N -> faseAtual.proximaFase();
             case KeyEvent.VK_G -> salvarJogo(); // G de gravar
             case KeyEvent.VK_L -> carregarJogo(); // L de load
+            case KeyEvent.VK_R -> this.faseAtual.reiniciarJogo();
         }
 
         this.atualizaCamera();

@@ -38,8 +38,8 @@ public class ControleDeJogo {
 
             // Verifica colisão
             if (posHero.igual(p.getPosicao())) {
-                if (p.isbTransponivel()) {
-                    if (p.isbMortal()) {
+                if (p.isTransponivel()) {
+                    if (p.isMortal()) {
                         it.remove(); // Remove a entidade mortal
                     }
                 }
@@ -50,7 +50,7 @@ public class ControleDeJogo {
     /*Retorna true se a posicao p é válida para o herói com relação a outros personagens*/
     public boolean ehPosicaoValida(ArrayList<Personagem> entidades, Posicao p) {
         for (Personagem personagem : entidades) {
-            if (!personagem.isbTransponivel()) {
+            if (!personagem.isTransponivel()) {
                 if (personagem.getPosicao().igual(p)) {
                     return false;
                 }

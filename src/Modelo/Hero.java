@@ -1,43 +1,26 @@
 package Modelo;
 
-import Auxiliar.Consts;
 import Auxiliar.Desenho;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
-public class Hero extends Personagem implements Serializable {
+public class Hero extends Personagem {
+    
     private ImageIcon upImage, downImage, leftImage, rightImage;
-    private String baseName;
-    private Fase faseAtual;
-
-    public Hero(String sNomeImagePNG, Fase faseAtual) {
-        super(sNomeImagePNG);
-        this.baseName = sNomeImagePNG.replace(".png", "");
-        this.faseAtual = faseAtual;
+ 
+    public Hero(String nomeImagem, Fase faseAtual) {
+        super(nomeImagem, faseAtual);
         this.carregarSprites();
-        this.iImage = downImage;
+        this.imagem = downImage;
     }
 
     @Override
     public void carregarSprites() {
-        upImage = carregarImagem(baseName + "_up.png");
-        downImage = carregarImagem(baseName + "_down.png");
-        leftImage = carregarImagem(baseName + "_left.png");
-        rightImage = carregarImagem(baseName + "_right.png");
+        upImage = carregarImagem(nomeImagem.replace(".png", "") + "_up.png");
+        downImage = carregarImagem(nomeImagem.replace(".png", "") + "_down.png");
+        leftImage = carregarImagem(nomeImagem.replace(".png", "") + "_left.png");
+        rightImage = carregarImagem(nomeImagem.replace(".png", "") + "_right.png");
     }
 
-    @Override
-    public void carregarImagem() {
-        carregarSprites();
-        this.iImage = downImage;
-    }
 
     public void voltaAUltimaPosicao() {
         this.pPosicao.volta();
@@ -68,65 +51,53 @@ public class Hero extends Personagem implements Serializable {
         return true;
     }
 
+    private void preencherComAgua(int y, int x){
+        faseAtual.setTile(y, x, new Tile("water.png", true, true,false));
+    }
+    
     public boolean moveUp() {
-        this.iImage = upImage;
+        this.imagem = upImage;
         int linhaAnterior = pPosicao.getLinha();
         int colunaAnterior = pPosicao.getColuna();
 
         if (super.moveUp() && validaPosicao()) {
-            try {
-                faseAtual.setTile(linhaAnterior, colunaAnterior, new Tile("water.png", true, true));
-            } catch (IOException ex) {
-                Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            preencherComAgua(linhaAnterior, colunaAnterior);
             return true;
         }
         return false;
     }
 
     public boolean moveDown() {
-        this.iImage = downImage;
+        this.imagem = downImage;
         int linhaAnterior = pPosicao.getLinha();
         int colunaAnterior = pPosicao.getColuna();
 
         if (super.moveDown() && validaPosicao()) {
-            try {
-                faseAtual.setTile(linhaAnterior, colunaAnterior, new Tile("water.png", true, true));
-            } catch (IOException ex) {
-                Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            preencherComAgua(linhaAnterior, colunaAnterior);
             return true;
         }
         return false;
     }
 
     public boolean moveLeft() {
-        this.iImage = leftImage;
+        this.imagem = leftImage;
         int linhaAnterior = pPosicao.getLinha();
         int colunaAnterior = pPosicao.getColuna();
 
         if (super.moveLeft() && validaPosicao()) {
-            try {
-                faseAtual.setTile(linhaAnterior, colunaAnterior, new Tile("water.png", true, true));
-            } catch (IOException ex) {
-                Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            preencherComAgua(linhaAnterior, colunaAnterior);
             return true;
         }
         return false;
     }
 
     public boolean moveRight() {
-        this.iImage = rightImage;
+        this.imagem = rightImage;
         int linhaAnterior = pPosicao.getLinha();
         int colunaAnterior = pPosicao.getColuna();
 
         if (super.moveRight() && validaPosicao()) {
-            try {
-                faseAtual.setTile(linhaAnterior, colunaAnterior, new Tile("water.png", true, true));
-            } catch (IOException ex) {
-                Logger.getLogger(Hero.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            preencherComAgua(linhaAnterior, colunaAnterior);
             return true;
         }
         return false;

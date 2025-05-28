@@ -4,7 +4,6 @@ package Modelo;
 import Auxiliar.Consts;
 import Controler.Tela;
 import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,6 +22,8 @@ public class Fase implements Serializable {
        private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
        private int tentativas;
        private int pontos;
+       private int comidas;
+       private int maxComidas;
        
        public Fase(Tela tela, int levelAtual){
            this.tela = tela;
@@ -49,13 +50,23 @@ public class Fase implements Serializable {
        public void proximaFase() {
         if (levelAtual < Consts.TOTAL_LEVEIS) {
             tentativas=0;
+            comidas = 0;
             levelAtual++;
+           
             this.carregarFase(levelAtual);
         } else {
             // Jogo completado
             System.out.println("Parabéns! Você completou todos os níveis!");
         }
     }
+       
+       public void reiniciarJogo(){
+           tentativas =0;
+           comidas =0;
+           pontos=0;
+           levelAtual=1;
+           carregarFase(1);
+       }
        
        public void ConstroiMundo(String path, Tela tela) throws IOException {
         this.tela = tela;
@@ -78,19 +89,19 @@ public class Fase implements Serializable {
        
        private void processaPixel(int pixel, int y, int x) throws IOException {
         if (pixel == 0xFFFFFFFF) { // branco - chão
-            this.setTile(y, x, new Tile("ground.png", true));
+            this.setTile(y, x, new Tile("ground.png", true, false, false));
         } else if (pixel == 0xFF000000) { // preto - parede
-            this.setTile(y, x, new Tile("wall.png", false));
+            this.setTile(y, x, new Tile("wall.png", false,false,false));
         }else if (pixel == 0xFF404040) { // cinza - backgorund
-            this.setTile(y, x, new Tile("background.png", false)); 
+            this.setTile(y, x, new Tile("background.png", false, false, false)); 
         } else if (pixel == 0xFF0026FF) { // azul - Fim
-            this.setTile(y, x, new Tile("End.png", true, 1)); 
+            this.setTile(y, x, new Tile("End.png", true, false , true)); 
         } 
         else if (pixel == 0xFFFF0000) { // vermelho - herói
             hero = new Hero("hero.png",this);
             hero.setPosicao(y, x);
             this.AdicionaEntidade(hero);
-            this.setTile(y, x, new Tile("ground.png", true));
+            this.setTile(y, x, new Tile("ground.png", true, false, false));
         }
         // Adicione mais condições para outros elementos do jogo   
     }
@@ -164,6 +175,24 @@ public class Fase implements Serializable {
     
     public void adicionarPontos(int qtd){
         this.pontos += qtd;
+    }
+    
+    public int getComidas(){
+        return this.comidas;
+    }
+    
+    public int getMaxComidas(){
+        return this.maxComidas;
+    }
+    
+    public void setMaxComidas(int c){
+        this.maxComidas = c;
+    }
+    
+    public void adicionarComida(){
+        if(this.comidas<this.maxComidas){
+            this.comidas++;
+        }
     }
    
 }
