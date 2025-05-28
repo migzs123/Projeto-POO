@@ -89,12 +89,28 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
 /*------------CAMERA------------*/
     public void atualizaCamera() {
-        int linha = faseAtual.getHero().getPosicao().getLinha();
-        int coluna = faseAtual.getHero().getPosicao().getColuna();
+    int linha = faseAtual.getHero().getPosicao().getLinha();
+    int coluna = faseAtual.getHero().getPosicao().getColuna();
 
-        cameraLinha = Math.max(0, Math.min(linha - Consts.RES / 2, Consts.MUNDO_ALTURA - Consts.RES));
-        cameraColuna = Math.max(0, Math.min(coluna - Consts.RES / 2, Consts.MUNDO_LARGURA - Consts.RES));
+    int limiteSuperior = cameraLinha + Consts.MARGEM;
+    int limiteInferior = cameraLinha + Consts.RES - Consts.MARGEM - 1;
+    int limiteEsquerdo = cameraColuna + Consts.MARGEM;
+    int limiteDireito = cameraColuna + Consts.RES - Consts.MARGEM - 1;
+
+    // Ajusta verticalmente
+    if (linha < limiteSuperior) {
+        cameraLinha = Math.max(0, cameraLinha - (limiteSuperior - linha));
+    } else if (linha > limiteInferior) {
+        cameraLinha = Math.min(Consts.MUNDO_ALTURA - Consts.RES, cameraLinha + (linha - limiteInferior));
     }
+
+    // Ajusta horizontalmente
+    if (coluna < limiteEsquerdo) {
+        cameraColuna = Math.max(0, cameraColuna - (limiteEsquerdo - coluna));
+    } else if (coluna > limiteDireito) {
+        cameraColuna = Math.min(Consts.MUNDO_LARGURA - Consts.RES, cameraColuna + (coluna - limiteDireito));
+    }
+}
     
     public int getCameraLinha() {
         return cameraLinha;
