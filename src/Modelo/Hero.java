@@ -47,7 +47,15 @@ public class Hero extends Personagem {
             faseAtual.proximaFase();
             return false;
         }
-
+        
+        for (Personagem p : faseAtual.getEntidades()) {
+        if (p instanceof Food) {
+            if (p.getPosicao().igual(this.getPosicao())) {
+                ((Food) p).checarColisao();
+            }
+        }
+      }
+        
         return true;
     }
 
