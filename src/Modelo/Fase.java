@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -35,6 +36,7 @@ public class Fase implements Serializable {
        
        public void carregarFase(int n) {
         if(n == levelAtual){
+            maxComidas = 0;
             tentativas++;
         }
         entidades = new ArrayList<>();
@@ -49,6 +51,7 @@ public class Fase implements Serializable {
        
        public void proximaFase() {
         if (levelAtual < Consts.TOTAL_LEVEIS) {
+            maxComidas = 0;
             tentativas=0;
             comidas = 0;
             levelAtual++;
@@ -61,6 +64,7 @@ public class Fase implements Serializable {
     }
        
        public void reiniciarJogo(){
+           maxComidas = 0;
            tentativas =0;
            comidas =0;
            pontos=0;
@@ -95,7 +99,12 @@ public class Fase implements Serializable {
         }else if (pixel == 0xFF404040) { // cinza - backgorund
             this.setTile(y, x, new Tile("background.png", false, false, false)); 
         } else if (pixel == 0xFF0026FF) { // azul - Fim
-            this.setTile(y, x, new Tile("End.png", true, false , true)); 
+//            this.setTile(y, x, new Tile("End.png", true, false , true));
+              Food comida = new Food("peixe.png", this);
+                comida.setPosicao(y, x);
+                this.AdicionaEntidade(comida);
+                this.addMaxComidas();
+               this.setTile(y, x, new Tile("ground.png", true, false, false));
         } 
         else if (pixel == 0xFFFF0000) { // vermelho - herói
             hero = new Hero("hero.png",this);
@@ -103,8 +112,14 @@ public class Fase implements Serializable {
             this.AdicionaEntidade(hero);
             this.setTile(y, x, new Tile("ground.png", true, false, false));
         }
-        // Adicione mais condições para outros elementos do jogo   
+//            else if (pixel == 0xFF00FF00) {
+//                Food comida = new Food("peixe.png", this);
+//                comida.setPosicao(y, x);
+//                this.AdicionaEntidade(comida);
+//                this.setTile(y, x, new Tile("ground.png", true, false, false));
+//            } 
     }
+
        
        public void recarregarRecursos() {
             for (Personagem p : entidades) {
@@ -185,8 +200,8 @@ public class Fase implements Serializable {
         return this.maxComidas;
     }
     
-    public void setMaxComidas(int c){
-        this.maxComidas = c;
+    public void addMaxComidas(){
+        this.maxComidas++;
     }
     
     public void adicionarComida(){
