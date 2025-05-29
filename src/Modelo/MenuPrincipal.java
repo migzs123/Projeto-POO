@@ -39,7 +39,9 @@ public class MenuPrincipal extends JFrame {
         JButton btnCreditos = criarBotaoComImagem("CreditosN.png", "CreditosH.png");
         JButton btnSair = criarBotaoComImagem("sairN.png", "sairH.png");
 
-        btnCreditos.addActionListener(e -> JOptionPane.showMessageDialog(this, "Feito por você :)"));
+        btnCreditos.addActionListener(e -> JOptionPane.showMessageDialog(this, "Miguel Zalochi Saffioti 15480474\n"
+                + "Cibele Soares de Almeida 15676493\n"
+                + "João Victor do Prado Souza 15582071"));
         btnSair.addActionListener(e -> System.exit(0));
 
         painelBotoes.add(btnJogarOuContinuar);
@@ -58,10 +60,7 @@ public class MenuPrincipal extends JFrame {
 
     private void iniciarJogo() {
         dispose();
-        Tela tela = new Tela();
-        tela.setVisible(true);
-        tela.createBufferStrategy(2);
-        tela.go();
+        new TelaTutorial();
     }
 
     private void carregarJogo() {
