@@ -74,11 +74,31 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("save.dat"))) {
             faseAtual = (Fase) in.readObject();
             faseAtual.setTela(this);
-            faseAtual.recarregarRecursos(); // exemplo: para reconfigurar imagens
+            faseAtual.recarregarRecursos();
+
+            // Atualiza imagens dos botões (pra refletir o estado apertado)
+            for (Personagem p : faseAtual.getPersonagens()) {
+                if (p instanceof Botao) {
+                    ((Botao)p).atualizaImagem();
+                }
+            }
             this.atualizaCamera();
             System.out.println("Jogo carregado com sucesso."); 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+    
+    public void deletarSave() {
+        java.io.File saveFile = new java.io.File("save.dat");
+        if (saveFile.exists()) {
+            if (saveFile.delete()) {
+                System.out.println("Save deletado com sucesso.");
+            } else {
+                System.out.println("Falha ao deletar o save.");
+            }
+        } else {
+            System.out.println("Arquivo de save não existe.");
         }
     }
      
@@ -130,7 +150,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         // Verifica se o tile é transponível
         Tile t = faseAtual.getTile(p.getLinha(), p.getColuna());
-        return t == null || t.isTransponivel();
+        Personagem c = faseAtual.getPersonagem(p.getLinha(), p.getColuna());
+        return (t == null || t.isTransponivel()) && (c==null || c.isTransponivel());
     }
 
 /*------------GRAFICOS------------*/
@@ -160,8 +181,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         // Desenhar personagens
         if (!faseAtual.estaVazia()) {
-            cj.desenhaTudo(faseAtual.getEntidades());
-            cj.processaTudo(faseAtual.getEntidades());
+            cj.desenhaTudo(faseAtual.getPersonagens());
+            cj.processaTudo(faseAtual.getPersonagens());
         }
 
         desenharHUD(g2);
@@ -278,10 +299,10 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             case KeyEvent.VK_S -> faseAtual.getHero().moveDown();
             case KeyEvent.VK_A -> faseAtual.getHero().moveLeft();
             case KeyEvent.VK_D -> faseAtual.getHero().moveRight();
-            case KeyEvent.VK_N -> faseAtual.proximaFase();
             case KeyEvent.VK_G -> salvarJogo(); // G de gravar
             case KeyEvent.VK_L -> carregarJogo(); // L de load
-            case KeyEvent.VK_R -> this.faseAtual.reiniciarJogo();
+            case KeyEvent.VK_R -> this.faseAtual.reiniciarFase();
+            case KeyEvent.VK_N -> this.faseAtual.reiniciarJogo();
         }
 
         this.atualizaCamera();

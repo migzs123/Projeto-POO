@@ -37,6 +37,7 @@ public class Hero extends Personagem {
         }
 
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
+        
         if (tileAtual != null && tileAtual.isMortal()) {
             System.out.println("GAME OVER: O herói caiu na água gelada!");
             Desenho.acessoATelaDoJogo().faseAtual.carregarFase(faseAtual.getFase());
@@ -48,19 +49,31 @@ public class Hero extends Personagem {
             return false;
         }
         
-        for (Personagem p : faseAtual.getEntidades()) {
+        for (Personagem p : faseAtual.getPersonagens()) {
+
         if (p instanceof Food) {
             if (p.getPosicao().igual(this.getPosicao())) {
                 ((Food) p).checarColisao();
             }
         }
-      }
-        
+        if (p instanceof Botao) {
+            if (p.getPosicao().igual(this.getPosicao())) {
+                ((Botao) p).checarColisao();
+            }
+        }
+      }     
         return true;
     }
 
     private void preencherComAgua(int y, int x){
-        faseAtual.setTile(y, x, new Tile("water.png", true, true,false));
+            // Verifica se há um botão na posição
+        for (Personagem p : faseAtual.getPersonagens()) {
+            if (p instanceof Botao && p.getPosicao().getLinha() == y && p.getPosicao().getColuna() == x) {
+                return; // Não substitui o chão do botão
+            }
+        }
+
+        faseAtual.setTile(y, x, new Tile("water.png", true, true, false));
     }
     
     public boolean moveUp() {
