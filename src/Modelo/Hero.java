@@ -37,6 +37,7 @@ public class Hero extends Personagem {
         }
 
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
+        
         if (tileAtual != null && tileAtual.isMortal()) {
             System.out.println("GAME OVER: O herói caiu na água gelada!");
             Desenho.acessoATelaDoJogo().faseAtual.carregarFase(faseAtual.getFase());
@@ -49,13 +50,18 @@ public class Hero extends Personagem {
         }
         
         for (Personagem p : faseAtual.getEntidades()) {
+
         if (p instanceof Food) {
             if (p.getPosicao().igual(this.getPosicao())) {
                 ((Food) p).checarColisao();
             }
         }
-      }
-        
+        if (p instanceof Botao) {
+            if (p.getPosicao().igual(this.getPosicao())) {
+                ((Botao) p).checarColisao();
+            }
+        }
+      }     
         return true;
     }
 
