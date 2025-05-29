@@ -109,27 +109,26 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
 /*------------CAMERA------------*/
     public void atualizaCamera() {
-    int linha = faseAtual.getHero().getPosicao().getLinha();
-    int coluna = faseAtual.getHero().getPosicao().getColuna();
+        int linha = faseAtual.getHero().getPosicao().getLinha();
+        int coluna = faseAtual.getHero().getPosicao().getColuna();
 
-    int limiteSuperior = cameraLinha + Consts.MARGEM;
-    int limiteInferior = cameraLinha + Consts.RES - Consts.MARGEM - 1;
-    int limiteEsquerdo = cameraColuna + Consts.MARGEM;
-    int limiteDireito = cameraColuna + Consts.RES - Consts.MARGEM - 1;
+        // === Vertical: sempre centraliza ===
+        cameraLinha = linha - Consts.RES / 2;
+        if (cameraLinha < 0) {
+            cameraLinha = 0;
+        } else if (cameraLinha > Consts.MUNDO_ALTURA - Consts.RES) {
+            cameraLinha = Consts.MUNDO_ALTURA - Consts.RES;
+        }
 
-    // Ajusta verticalmente
-    if (linha < limiteSuperior) {
-        cameraLinha = Math.max(0, cameraLinha - (limiteSuperior - linha));
-    } else if (linha > limiteInferior) {
-        cameraLinha = Math.min(Consts.MUNDO_ALTURA - Consts.RES, cameraLinha + (linha - limiteInferior));
-    }
+        // === Horizontal: mantém a lógica da margem ===
+        int limiteEsquerdo = cameraColuna + Consts.MARGEM;
+        int limiteDireito = cameraColuna + Consts.RES - Consts.MARGEM - 1;
 
-    // Ajusta horizontalmente
-    if (coluna < limiteEsquerdo) {
-        cameraColuna = Math.max(0, cameraColuna - (limiteEsquerdo - coluna));
-    } else if (coluna > limiteDireito) {
-        cameraColuna = Math.min(Consts.MUNDO_LARGURA - Consts.RES, cameraColuna + (coluna - limiteDireito));
-    }
+        if (coluna < limiteEsquerdo) {
+            cameraColuna = Math.max(0, cameraColuna - (limiteEsquerdo - coluna));
+        } else if (coluna > limiteDireito) {
+            cameraColuna = Math.min(Consts.MUNDO_LARGURA - Consts.RES, cameraColuna + (coluna - limiteDireito));
+        }
 }
     
     public int getCameraLinha() {

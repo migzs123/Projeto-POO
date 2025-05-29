@@ -1,6 +1,7 @@
 package Modelo;
 
 import Auxiliar.Desenho;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 public class Hero extends Personagem {
@@ -49,18 +50,17 @@ public class Hero extends Personagem {
             return false;
         }
         
-        for (Personagem p : faseAtual.getPersonagens()) {
-
-        if (p instanceof Food) {
-            if (p.getPosicao().igual(this.getPosicao())) {
-                ((Food) p).checarColisao();
+        for (Personagem p :  new ArrayList<>(faseAtual.getPersonagens())) {
+            if (p instanceof Food) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Food) p).checarColisao();
+                }
             }
-        }
-        if (p instanceof Botao) {
-            if (p.getPosicao().igual(this.getPosicao())) {
-                ((Botao) p).checarColisao();
+            if (p instanceof Botao) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Botao) p).checarColisao();
+                }
             }
-        }
       }     
         return true;
     }
