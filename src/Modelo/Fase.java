@@ -19,6 +19,7 @@ public class Fase implements Serializable {
        private transient Tela tela;
        private int levelAtual;
        private Hero hero;
+       private Botao botao;
        private ArrayList<Personagem> personagens;
        private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
        private int tentativas;
@@ -80,16 +81,29 @@ public class Fase implements Serializable {
                 BufferedImage map = ImageIO.read(getClass().getResource(path));
                 int[] pixels = new int[map.getWidth() * map.getHeight()];
                 map.getRGB(0, 0, map.getWidth(), map.getHeight(), pixels, 0, map.getWidth());
-
                 for (int y = 0; y < map.getHeight(); y++) {
                     for (int x = 0; x < map.getWidth(); x++) {
                         int pixelAtual = pixels[x + (y * map.getWidth())];
 
-                        if (pixelAtual == 0xFFFF0000) { // vermelho - herói
+                        if (pixelAtual == 0xFFFF00DC) { // Botão rosa claro
+                            botao = new Botao("botao.png", this);
+                            botao.setPosicao(y, x);
+                            this.AdicionaEntidade(botao);
+                            this.setTile(y, x, new Tile("wall.png", true, false, false));
+                        }
+                    }
+                }
+
+                // Depois: processar todo o resto, herói, bombas, comida, tiles etc
+                for (int y = 0; y < map.getHeight(); y++) {
+                    for (int x = 0; x < map.getWidth(); x++) {
+                        int pixelAtual = pixels[x + (y * map.getWidth())];
+
+                        if (pixelAtual == 0xFFFF0000) { // herói
                             tempHero = new Hero("hero.png", this);
                             tempHero.setPosicao(y, x);
                             this.setTile(y, x, new Tile("ground.png", true, false, false));
-                        } else {
+                        } else if (pixelAtual != 0xFFFF00DC) { // já processou botão no primeiro loop
                             processaPixel(pixelAtual, y, x);
                         }
                     }
@@ -116,11 +130,12 @@ public class Fase implements Serializable {
         } else if (pixel == 0xFF0026FF) { // azul - Fim
             this.setTile(y, x, new Tile("End.png", true, false , true));
         } 
-        else if (pixel == 0xFFFF00DC){ // Rosa Claro - Botao
-            Botao botao = new Botao("botao.png",this);
-            botao.setPosicao(y, x);
-            this.AdicionaEntidade(botao);
-            this.setTile(y, x, new Tile("wall.png", true, false, false));
+        else if(pixel == 0xFF57007F){ // Rosa Escuro - Bombas
+            Bomba b = new Bomba("dinamite.png" ,this);
+            b.setPosicao(y, x);
+            this.AdicionaEntidade(b);
+            botao.adicionarBomba(b);
+            this.setTile(y, x, new Tile("ground.png", true, false, false));
         }
         else if (pixel == 0xFF00FF00) { // Verde - Comida
               Food comida = new Food("peixe.png", this);
