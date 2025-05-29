@@ -19,7 +19,7 @@ public class Fase implements Serializable {
        private transient Tela tela;
        private int levelAtual;
        private Hero hero;
-       private ArrayList<Personagem> entidades;
+       private ArrayList<Personagem> personagens;
        private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
        private int tentativas;
        private int pontos;
@@ -39,7 +39,7 @@ public class Fase implements Serializable {
             maxComidas = 0;
             tentativas++;
         }
-        entidades = new ArrayList<>();
+        personagens = new ArrayList<>();
         mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
         
         try {
@@ -73,22 +73,37 @@ public class Fase implements Serializable {
        }
        
        public void ConstroiMundo(String path, Tela tela) throws IOException {
-        this.tela = tela;
-        try {
-            BufferedImage map = ImageIO.read(getClass().getResource(path));
-            int[] pixels = new int[map.getWidth() * map.getHeight()];
-            map.getRGB(0, 0, map.getWidth(), map.getHeight(), pixels, 0, map.getWidth());
+            this.tela = tela;
+            Hero tempHero = null;
 
-            for (int y = 0; y < map.getHeight(); y++) {
-                for (int x = 0; x < map.getWidth(); x++) {
-                    int pixelAtual = pixels[x + (y * map.getWidth())];
-                    processaPixel(pixelAtual, y, x);
+            try {
+                BufferedImage map = ImageIO.read(getClass().getResource(path));
+                int[] pixels = new int[map.getWidth() * map.getHeight()];
+                map.getRGB(0, 0, map.getWidth(), map.getHeight(), pixels, 0, map.getWidth());
+
+                for (int y = 0; y < map.getHeight(); y++) {
+                    for (int x = 0; x < map.getWidth(); x++) {
+                        int pixelAtual = pixels[x + (y * map.getWidth())];
+
+                        if (pixelAtual == 0xFFFF0000) { // vermelho - herói
+                            tempHero = new Hero("hero.png", this);
+                            tempHero.setPosicao(y, x);
+                            this.setTile(y, x, new Tile("ground.png", true, false, false));
+                        } else {
+                            processaPixel(pixelAtual, y, x);
+                        }
+                    }
                 }
+
+                if (tempHero != null) {
+                    this.AdicionaEntidade(tempHero); // adiciona no final
+                    this.hero = tempHero;
+                }
+
+            } catch (IOException e) {
+                System.err.println("Erro ao carregar o mapa: " + path);
+                throw e;
             }
-        } catch (IOException e) {
-            System.err.println("Erro ao carregar o mapa: " + path);
-            throw e;
-        }
     }
        
        private void processaPixel(int pixel, int y, int x) throws IOException {
@@ -99,30 +114,27 @@ public class Fase implements Serializable {
         }else if (pixel == 0xFF404040) { // cinza - backgorund
             this.setTile(y, x, new Tile("background.png", false, false, false)); 
         } else if (pixel == 0xFF0026FF) { // azul - Fim
-//            this.setTile(y, x, new Tile("End.png", true, false , true));
-              Food comida = new Food("peixe.png", this);
-                comida.setPosicao(y, x);
-                this.AdicionaEntidade(comida);
-                this.addMaxComidas();
-               this.setTile(y, x, new Tile("ground.png", true, false, false));
+            this.setTile(y, x, new Tile("End.png", true, false , true));
         } 
-        else if (pixel == 0xFFFF0000) { // vermelho - herói
-            hero = new Hero("hero.png",this);
-            hero.setPosicao(y, x);
-            this.AdicionaEntidade(hero);
-            this.setTile(y, x, new Tile("ground.png", true, false, false));
+        else if (pixel == 0xFFFF00DC){ // Rosa Claro - Botao
+            Botao botao = new Botao("botao.png",this);
+            botao.setPosicao(y, x);
+            this.AdicionaEntidade(botao);
+            this.setTile(y, x, new Tile("wall.png", true, false, false));
         }
-//            else if (pixel == 0xFF00FF00) {
-//                Food comida = new Food("peixe.png", this);
-//                comida.setPosicao(y, x);
-//                this.AdicionaEntidade(comida);
-//                this.setTile(y, x, new Tile("ground.png", true, false, false));
-//            } 
+        else if (pixel == 0xFF00FF00) { // Verde - Comida
+              Food comida = new Food("peixe.png", this);
+              comida.setPosicao(y, x);
+              this.addMaxComidas();
+              this.AdicionaEntidade(comida);
+              this.setTile(y, x, new Tile("ground.png", true, false, false));
+          } 
+        
     }
 
        
        public void recarregarRecursos() {
-            for (Personagem p : entidades) {
+            for (Personagem p : personagens) {
                 p.carregarImagem(); // Hero e outros devem implementar isso
             }
 
@@ -146,10 +158,18 @@ public class Fase implements Serializable {
     public Tile getTile(int linha, int coluna) {
         return mapaBase[linha][coluna];
     }
+    
+    public Personagem getPersonagem(int linha, int coluna) {
+        for (Personagem p : personagens) {
+            if (p.getPosicao().getLinha() == linha && p.getPosicao().getColuna() == coluna) {
+                return p;
+            }
+        }
+        return null;
+    }  
        
-       
-    public ArrayList<Personagem> getEntidades(){
-         return entidades;
+    public ArrayList<Personagem> getPersonagens(){
+         return personagens;
     }
        
     public int getTentativas(){
@@ -157,15 +177,15 @@ public class Fase implements Serializable {
     }
        
     public void AdicionaEntidade(Personagem p){
-       entidades.add(p);
+       personagens.add(p);
     }
 
    public void RemoveEntidade(Personagem p){
-       entidades.remove(p);
+       personagens.remove(p);
     }
 
    public boolean estaVazia(){
-       return entidades.isEmpty();
+       return personagens.isEmpty();
     }
 
    public int getFase(){

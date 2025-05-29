@@ -130,7 +130,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         // Verifica se o tile é transponível
         Tile t = faseAtual.getTile(p.getLinha(), p.getColuna());
-        return t == null || t.isTransponivel();
+        Personagem c = faseAtual.getPersonagem(p.getLinha(), p.getColuna());
+        return (t == null || t.isTransponivel()) && (c==null || c.isTransponivel());
     }
 
 /*------------GRAFICOS------------*/
@@ -160,8 +161,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         // Desenhar personagens
         if (!faseAtual.estaVazia()) {
-            cj.desenhaTudo(faseAtual.getEntidades());
-            cj.processaTudo(faseAtual.getEntidades());
+            cj.desenhaTudo(faseAtual.getPersonagens());
+            cj.processaTudo(faseAtual.getPersonagens());
         }
 
         desenharHUD(g2);
