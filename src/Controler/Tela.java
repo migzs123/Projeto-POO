@@ -74,7 +74,14 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("save.dat"))) {
             faseAtual = (Fase) in.readObject();
             faseAtual.setTela(this);
-            faseAtual.recarregarRecursos(); // exemplo: para reconfigurar imagens
+            faseAtual.recarregarRecursos();
+
+            // Atualiza imagens dos botões (pra refletir o estado apertado)
+            for (Personagem p : faseAtual.getPersonagens()) {
+                if (p instanceof Botao) {
+                    ((Botao)p).atualizaImagem();
+                }
+            }
             this.atualizaCamera();
             System.out.println("Jogo carregado com sucesso."); 
         } catch (IOException | ClassNotFoundException e) {

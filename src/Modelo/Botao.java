@@ -12,7 +12,11 @@ public class Botao extends Personagem {
     public Botao(String nomeImagem, Fase faseAtual) {
         super(nomeImagem, faseAtual);
         this.carregarSprites();
-        this.imagem = botaoN;
+        if(apertado){
+            this.imagem = botaoP;
+        }else{
+            this.imagem = botaoN;
+        } 
         bombas = new ArrayList<>();
     }
     
@@ -33,6 +37,7 @@ public class Botao extends Personagem {
     private void apertar(){
         apertado = true;
         this.imagem = botaoP;
+        atualizaImagem();
         explodirBombas();
     }
     
@@ -46,4 +51,11 @@ public class Botao extends Personagem {
         }
     }
     
+    public void atualizaImagem() {
+    if (apertado) {
+        this.imagem = botaoP;
+    } else {
+        this.imagem = botaoN;
+    }
+}
 }
