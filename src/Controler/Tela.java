@@ -3,6 +3,7 @@ package Controler;
 import Modelo.*;
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
+import Auxiliar.Som;
 import auxiliar.Posicao;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -35,6 +36,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
     public Fase faseAtual;
     
+    private Som musicaGameplay;
+    
     private Font pixelFont;
     private final Set<Integer> teclasPressionadas = new HashSet<>();
     
@@ -58,6 +61,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
                 System.out.println("Salvando antes de fechar...");
             }
         });
+        musicaGameplay = new Som("/sounds/ost.wav");
     }
     
 /*------------SALVAMENTO------------*/
@@ -258,6 +262,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     }
     
     public void go() {
+        musicaGameplay.tocarLoop();
         new Thread(() -> {
             long lastTime = System.nanoTime();
             double nsPerTick = 1_000_000_000.0 / 60.0; // 60 FPS alvo
