@@ -9,13 +9,15 @@ import javax.swing.ImageIcon;
 public class Hero extends Personagem {
 
     private transient Som falhouSom;
+    private transient Som passouSom;
     private ImageIcon upImage, downImage, leftImage, rightImage;
 
     public Hero(String nomeImagem, Fase faseAtual) {
         super(nomeImagem, faseAtual);
         this.carregarSprites();
         this.imagem = downImage;
-        falhouSom = new Som("/sounds/fail.wav"); // caminho correto no resources
+        falhouSom = new Som("/sounds/fail.wav"); 
+        passouSom = new Som("/sounds/win.wav"); 
     }
 
     @Override
@@ -45,11 +47,12 @@ public class Hero extends Personagem {
         if (tileAtual != null && tileAtual.isMortal()) {
             System.out.println("O herói caiu na água gelada!");
             falhouSom.tocarUmaVez();
-            Desenho.acessoATelaDoJogo().faseAtual.carregarFase(faseAtual.getFase());
+            faseAtual.carregarFase(faseAtual.getFase());
             return false;
         }
 
         if (tileAtual != null && tileAtual.isFim()) {
+            passouSom.tocarUmaVez();
             faseAtual.proximaFase();
             return false;
         }
@@ -82,6 +85,7 @@ public class Hero extends Personagem {
         in.defaultReadObject();  // desserializa campos normais
         // recria o som
         falhouSom = new Som("/sounds/fail.wav");
+         passouSom = new Som("/sounds/win.wav");
     }
     
     public boolean moveUp() {

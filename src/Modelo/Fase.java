@@ -38,6 +38,7 @@ public class Fase implements Serializable {
        public void carregarFase(int n) {
         if(n == levelAtual){
             maxComidas = 0;
+            comidas=0;
             tentativas++;
         }
         personagens = new ArrayList<>();
