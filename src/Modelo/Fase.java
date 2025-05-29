@@ -71,6 +71,14 @@ public class Fase implements Serializable {
            pontos=0;
            levelAtual=1;
            carregarFase(1);
+           tela.deletarSave();
+       }
+       
+       public void reiniciarFase(){
+           maxComidas = 0;
+           tentativas++;
+           comidas =0;
+           carregarFase(levelAtual);
        }
        
        public void ConstroiMundo(String path, Tela tela) throws IOException {

@@ -88,6 +88,19 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             e.printStackTrace();
         }
     }
+    
+    public void deletarSave() {
+        java.io.File saveFile = new java.io.File("save.dat");
+        if (saveFile.exists()) {
+            if (saveFile.delete()) {
+                System.out.println("Save deletado com sucesso.");
+            } else {
+                System.out.println("Falha ao deletar o save.");
+            }
+        } else {
+            System.out.println("Arquivo de save não existe.");
+        }
+    }
      
     public static boolean existeSave() {
         java.io.File saveFile = new java.io.File("save.dat");
@@ -286,10 +299,10 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             case KeyEvent.VK_S -> faseAtual.getHero().moveDown();
             case KeyEvent.VK_A -> faseAtual.getHero().moveLeft();
             case KeyEvent.VK_D -> faseAtual.getHero().moveRight();
-            case KeyEvent.VK_N -> faseAtual.proximaFase();
             case KeyEvent.VK_G -> salvarJogo(); // G de gravar
             case KeyEvent.VK_L -> carregarJogo(); // L de load
-            case KeyEvent.VK_R -> this.faseAtual.reiniciarJogo();
+            case KeyEvent.VK_R -> this.faseAtual.reiniciarFase();
+            case KeyEvent.VK_N -> this.faseAtual.reiniciarJogo();
         }
 
         this.atualizaCamera();
