@@ -6,7 +6,7 @@ import javax.swing.ImageIcon;
 public class Hero extends Personagem {
     
     private ImageIcon upImage, downImage, leftImage, rightImage;
- 
+    private boolean hasKey = false;
     public Hero(String nomeImagem, Fase faseAtual) {
         super(nomeImagem, faseAtual);
         this.carregarSprites();
@@ -19,6 +19,11 @@ public class Hero extends Personagem {
         downImage = carregarImagem(nomeImagem.replace(".png", "") + "_down.png");
         leftImage = carregarImagem(nomeImagem.replace(".png", "") + "_left.png");
         rightImage = carregarImagem(nomeImagem.replace(".png", "") + "_right.png");
+    }
+    
+    public void getKey(){
+        this.hasKey = true;
+        System.out.println("hasKey status:" + this.hasKey);
     }
 
 
@@ -53,6 +58,12 @@ public class Hero extends Personagem {
             if (p.getPosicao().igual(this.getPosicao())) {
                 ((Food) p).checarColisao();
             }
+        }
+        if (p instanceof Key) {
+            if (p.getPosicao().igual(this.getPosicao())) {
+                ((Key) p).checarColisao();
+            }
+            
         }
       }
         

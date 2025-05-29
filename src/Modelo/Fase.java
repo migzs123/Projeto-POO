@@ -100,11 +100,10 @@ public class Fase implements Serializable {
             this.setTile(y, x, new Tile("background.png", false, false, false)); 
         } else if (pixel == 0xFF0026FF) { // azul - Fim
 //            this.setTile(y, x, new Tile("End.png", true, false , true));
-              Food comida = new Food("peixe.png", this);
-                comida.setPosicao(y, x);
-                this.AdicionaEntidade(comida);
-                this.addMaxComidas();
-               this.setTile(y, x, new Tile("ground.png", true, false, false));
+              Key chave = new Key("chave.png", this);
+                chave.setPosicao(y, x);
+                this.AdicionaEntidade(chave);
+                this.setTile(y, x, new Tile("ground.png", true, false, false));
         } 
         else if (pixel == 0xFFFF0000) { // vermelho - herói
             hero = new Hero("hero.png",this);
