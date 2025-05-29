@@ -10,6 +10,10 @@ public class Som {
     public Som(String caminho) {
         try {
             URL soundURL = getClass().getResource(caminho);
+            if (soundURL == null) {
+                System.err.println("Arquivo de som não encontrado: " + caminho);
+                return;
+            }
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundURL);
             clip = AudioSystem.getClip();
             clip.open(audioIn);
@@ -20,7 +24,7 @@ public class Som {
 
     public void tocarLoop() {
         if (clip != null) {
-            clip.loop(Clip.LOOP_CONTINUOUSLY); // toca em loop
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
             clip.start();
         }
     }
@@ -33,6 +37,10 @@ public class Som {
 
     public void tocarUmaVez() {
         if (clip != null) {
+            if (clip.isRunning()) {
+                clip.stop();
+            }
+            clip.setFramePosition(0);  // Reinicia do início
             clip.start();
         }
     }

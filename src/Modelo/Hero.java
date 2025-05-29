@@ -1,17 +1,21 @@
 package Modelo;
 
 import Auxiliar.Desenho;
+import Auxiliar.Som;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 public class Hero extends Personagem {
-    
+
+    private transient Som falhouSom;
     private ImageIcon upImage, downImage, leftImage, rightImage;
- 
+
     public Hero(String nomeImagem, Fase faseAtual) {
         super(nomeImagem, faseAtual);
         this.carregarSprites();
         this.imagem = downImage;
+        falhouSom = new Som("/sounds/fail.wav"); // caminho correto no resources
     }
 
     @Override
@@ -21,7 +25,6 @@ public class Hero extends Personagem {
         leftImage = carregarImagem(nomeImagem.replace(".png", "") + "_left.png");
         rightImage = carregarImagem(nomeImagem.replace(".png", "") + "_right.png");
     }
-
 
     public void voltaAUltimaPosicao() {
         this.pPosicao.volta();
@@ -38,9 +41,10 @@ public class Hero extends Personagem {
         }
 
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
-        
+
         if (tileAtual != null && tileAtual.isMortal()) {
-            System.out.println("GAME OVER: O herói caiu na água gelada!");
+            System.out.println("O herói caiu na água gelada!");
+            falhouSom.tocarUmaVez();
             Desenho.acessoATelaDoJogo().faseAtual.carregarFase(faseAtual.getFase());
             return false;
         }
@@ -49,8 +53,8 @@ public class Hero extends Personagem {
             faseAtual.proximaFase();
             return false;
         }
-        
-        for (Personagem p :  new ArrayList<>(faseAtual.getPersonagens())) {
+
+        for (Personagem p : new ArrayList<>(faseAtual.getPersonagens())) {
             if (p instanceof Food) {
                 if (p.getPosicao().igual(this.getPosicao())) {
                     ((Food) p).checarColisao();
@@ -61,19 +65,23 @@ public class Hero extends Personagem {
                     ((Botao) p).checarColisao();
                 }
             }
-      }     
+        }
         return true;
     }
 
-    private void preencherComAgua(int y, int x){
-            // Verifica se há um botão na posição
+    private void preencherComAgua(int y, int x) {
         for (Personagem p : faseAtual.getPersonagens()) {
             if (p instanceof Botao && p.getPosicao().getLinha() == y && p.getPosicao().getColuna() == x) {
-                return; // Não substitui o chão do botão
+                return; // Não substituir chão do botão
             }
         }
-
         faseAtual.setTile(y, x, new Tile("water.png", true, true, false));
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();  // desserializa campos normais
+        // recria o som
+        falhouSom = new Som("/sounds/fail.wav");
     }
     
     public boolean moveUp() {
