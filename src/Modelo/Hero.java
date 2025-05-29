@@ -25,6 +25,10 @@ public class Hero extends Personagem {
         this.hasKey = true;
         System.out.println("hasKey status:" + this.hasKey);
     }
+    
+    public boolean getKeyStatus(){
+        return this.hasKey;
+    }
 
 
     public void voltaAUltimaPosicao() {
@@ -63,7 +67,11 @@ public class Hero extends Personagem {
             if (p.getPosicao().igual(this.getPosicao())) {
                 ((Key) p).checarColisao();
             }
-            
+        }
+        if (p instanceof Tranca) {
+            if (p.getPosicao().igual(this.getPosicao())) {
+                ((Tranca) p).checarColisao();
+            }
         }
       }
         

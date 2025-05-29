@@ -100,9 +100,9 @@ public class Fase implements Serializable {
             this.setTile(y, x, new Tile("background.png", false, false, false)); 
         } else if (pixel == 0xFF0026FF) { // azul - Fim
 //            this.setTile(y, x, new Tile("End.png", true, false , true));
-              Key chave = new Key("chave.png", this);
-                chave.setPosicao(y, x);
-                this.AdicionaEntidade(chave);
+              Tranca tranca = new Tranca("tranca.png", this);
+                tranca.setPosicao(y, x);
+                this.AdicionaEntidade(tranca);
                 this.setTile(y, x, new Tile("ground.png", true, false, false));
         } 
         else if (pixel == 0xFFFF0000) { // vermelho - herói
@@ -111,12 +111,18 @@ public class Fase implements Serializable {
             this.AdicionaEntidade(hero);
             this.setTile(y, x, new Tile("ground.png", true, false, false));
         }
-//            else if (pixel == 0xFF00FF00) {
-//                Food comida = new Food("peixe.png", this);
-//                comida.setPosicao(y, x);
-//                this.AdicionaEntidade(comida);
-//                this.setTile(y, x, new Tile("ground.png", true, false, false));
-//            } 
+      else if (pixel == 0xFF00FF00) { // VERDE - COMIDA
+                Food comida = new Food("peixe.png", this);
+                comida.setPosicao(y, x);
+                this.AdicionaEntidade(comida);
+                this.setTile(y, x, new Tile("ground.png", true, false, false));
+            } 
+       else if (pixel == 0xFFFFFF00) { // AMARELO - CHAVE
+                Key chave = new Key("chave.png", this);
+                chave.setPosicao(y, x);
+                this.AdicionaEntidade(chave);
+                this.setTile(y, x, new Tile("ground.png", true, false, false));
+            }
     }
 
        
