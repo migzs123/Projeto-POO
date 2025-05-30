@@ -66,4 +66,10 @@ public abstract class Entidade  implements Serializable{
     public String getNomeImagem() {
         return nomeImagem;
     }
+    private void readObject(java.io.ObjectInputStream in) 
+        throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        this.carregarImagem(); // Recarrega a imagem após desserialização
+    }
 }
+

@@ -16,7 +16,6 @@ public class ControleDeJogo {
 
     public void processaTudo(ArrayList<Personagem> entidades) {
         Hero hero = null;
-
         // Encontra o herói
         for (Personagem p : entidades) {
             if (p instanceof Hero) {

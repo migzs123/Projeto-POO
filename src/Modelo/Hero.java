@@ -2,6 +2,7 @@ package Modelo;
 
 import Auxiliar.Desenho;
 import Auxiliar.Som;
+import auxiliar.Posicao;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
@@ -71,12 +72,21 @@ public class Hero extends Personagem {
         }
         return true;
     }
+    public boolean comparaPosicao(int linha, int coluna){
+        if(this.getPosicao().getColuna() == coluna && this.getPosicao().getLinha() == linha){
+            return true;
+        }
+        return false;
+    }
 
     private void preencherComAgua(int y, int x) {
         for (Personagem p : faseAtual.getPersonagens()) {
             if (p instanceof Botao && p.getPosicao().getLinha() == y && p.getPosicao().getColuna() == x) {
                 return; // Não substituir chão do botão
             }
+        }
+        if(faseAtual.isReiniciando()){
+            return;
         }
         faseAtual.setTile(y, x, new Tile("water.png", true, true, false));
     }

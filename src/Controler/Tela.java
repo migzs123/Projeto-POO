@@ -13,11 +13,19 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.List;
 import java.awt.RenderingHints;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,13 +65,110 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         this.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
         public void windowClosing(java.awt.event.WindowEvent e) {
-                salvarJogo(); 
-                System.out.println("Salvando antes de fechar...");
+                deletarSave(); 
             }
         });
+        
+        new DropTarget(this, DnDConstants.ACTION_COPY, new DropTargetAdapter() {
+        @Override
+        public void drop(DropTargetDropEvent dtde) {
+            try {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                Transferable t = dtde.getTransferable();
+                java.util.List<File> files = (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+
+                for (File file : files) {
+                    if (file.getName().endsWith(".zip")) {
+                        int linha = (dtde.getLocation().y - getInsets().top) / Consts.CELL_SIDE + cameraLinha;
+                        int coluna = (dtde.getLocation().x - getInsets().left) / Consts.CELL_SIDE + cameraColuna;
+
+                        File tempDir = new File("temp_zip");
+                        if (!tempDir.exists()) tempDir.mkdirs();
+
+                        unzip(file.getAbsolutePath(), tempDir.getAbsolutePath());
+
+                        File objetoZipado = new File(tempDir, "personagem.obj");
+                        if (objetoZipado.exists()) {
+                            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(objetoZipado))) {
+                                Personagem p = (Personagem) in.readObject();
+                                p.setPosicao(linha, coluna);
+                           
+                               if (p instanceof Hero h) {
+                                    faseAtual.RemoveEntidade(faseAtual.getHero());
+                                    h.setFase(faseAtual); 
+                                    faseAtual.setHero(h);
+                                }
+                                else if (p instanceof Botao b) {
+                                    faseAtual.setTile(faseAtual.getBotao().getPosicao().getLinha(),
+                                             faseAtual.getBotao().getPosicao().getColuna(),
+                                             new Tile("ground.png", true, false,false));
+                                    b.setBombas(faseAtual.getBotao().getBombas());
+                                    faseAtual.RemoveEntidade(faseAtual.getBotao());
+                                    b.setFase(faseAtual);
+                                    faseAtual.setTile(linha, coluna, new Tile("wall.png", true, false, false));
+                                }
+                                else if (p instanceof Bomba b) {
+                                    b.setFase(faseAtual);
+                                    if (faseAtual.getBotao() != null) {
+                                        faseAtual.getBotao().adicionarBomba(b);
+                                    }
+                                }
+                                else if (p instanceof Food f) {
+                                    f.setFase(faseAtual);
+                                    faseAtual.addMaxComidas();
+                                }
+                                // Adiciona o personagem à fase
+                                faseAtual.AdicionaEntidade(p);
+                                }
+                        }
+                        faseAtual.RemoveEntidade(faseAtual.getHero());
+                        faseAtual.AdicionaEntidade(faseAtual.getHero());
+                        deleteDirectory(tempDir);
+                    }
+                }
+
+                repaint();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    });
+
         musicaGameplay = new Som("/sounds/ost.wav");
     }
+    private void deleteDirectory(File dir) {
+    File[] files = dir.listFiles();
+    if (files != null) {
+        for (File f : files) {
+            if (f.isDirectory()) {
+                deleteDirectory(f);
+            } else {
+                f.delete();
+            }
+        }
+    }
+    dir.delete();
+}
     
+    private void unzip(String zipFilePath, String destDir) throws IOException {
+    byte[] buffer = new byte[1024];
+    try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(new FileInputStream(zipFilePath))) {
+        java.util.zip.ZipEntry zipEntry = zis.getNextEntry();
+        while (zipEntry != null) {
+            File newFile = new File(destDir, zipEntry.getName());
+            try (FileOutputStream fos = new FileOutputStream(newFile)) {
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+            }
+            zipEntry = zis.getNextEntry();
+        }
+        zis.closeEntry();
+    }
+}
+
 /*------------SALVAMENTO------------*/
     public void salvarJogo() {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("save.dat"))) {

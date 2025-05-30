@@ -4,7 +4,7 @@ public class Tile extends Entidade {
     private final boolean fim;
 
 /*------------CONSTRUTORES------------*/
-    Tile(String nomeImagem, boolean transponivel, boolean mortal, boolean fim) {
+    public Tile(String nomeImagem, boolean transponivel, boolean mortal, boolean fim) {
         super(nomeImagem, transponivel, mortal);
         this.fim = fim;
         carregarImagem(); // da classe Entidade

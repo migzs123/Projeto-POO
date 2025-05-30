@@ -15,6 +15,10 @@ public abstract class Personagem extends Entidade {
 
     // Método que as subclasses devem implementar
     protected abstract void carregarSprites();
+    
+    public void setFase(Fase fase){
+        this.faseAtual = fase;
+    }
 
     public Posicao getPosicao() {
         return pPosicao;
