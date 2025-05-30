@@ -25,6 +25,7 @@ public class Tranca extends Personagem {
         if (this.getPosicao().igual(hero.getPosicao())){
             if (hero.getKeyStatus()){
                    this.transponivel = true;
+                   faseAtual.RemoveEntidade(this);
             } else {
                 //IMPLEMENTAR AVISO NA TELA
                  this.transponivel = false;

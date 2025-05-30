@@ -42,6 +42,10 @@ public class Bomba extends Personagem{
         faseAtual.reiniciarFase();
         return true;
     }
+    if(faseAtual.getPersonagem(linha, coluna) instanceof Botao || faseAtual.getPersonagem(linha, coluna) instanceof Bomba){}
+    else{
+        faseAtual.RemoveEntidade(faseAtual.getPersonagem(linha, coluna));
+    }
 
     if (!faseAtual.getTile(linha, coluna).nomeImagem.equals("ground.png")) {
         return false;
