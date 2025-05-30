@@ -261,6 +261,9 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         // Verifica se o tile é transponível
         Tile t = faseAtual.getTile(p.getLinha(), p.getColuna());
         Personagem c = faseAtual.getPersonagem(p.getLinha(), p.getColuna());
+        if(c instanceof Tranca && faseAtual.getHero().getKeyStatus()){
+            return true;
+        }
         return (t == null || t.isTransponivel()) && (c==null || c.isTransponivel());
     }
 
