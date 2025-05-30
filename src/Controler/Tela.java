@@ -93,6 +93,9 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
                                 Personagem p = (Personagem) in.readObject();
                                 p.setPosicao(linha, coluna);
                            
+                            if(faseAtual.getPersonagem(linha, coluna) != null){
+                                return;
+                            }
                                if (p instanceof Hero h) {
                                     faseAtual.RemoveEntidade(faseAtual.getHero());
                                     h.setFase(faseAtual); 
