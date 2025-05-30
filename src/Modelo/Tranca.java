@@ -29,7 +29,6 @@ public class Tranca extends Personagem {
                 //IMPLEMENTAR AVISO NA TELA
                  this.transponivel = false;
                  System.out.println("You do not have a key to pass!");
-                
             }
         }
     }
