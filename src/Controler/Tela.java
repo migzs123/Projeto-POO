@@ -3,6 +3,7 @@ package Controler;
 import Modelo.*;
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
+import Auxiliar.Som;
 import auxiliar.Posicao;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -35,6 +36,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
     public Fase faseAtual;
     
+    private Som musicaGameplay;
+    
     private Font pixelFont;
     private final Set<Integer> teclasPressionadas = new HashSet<>();
     
@@ -58,6 +61,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
                 System.out.println("Salvando antes de fechar...");
             }
         });
+        musicaGameplay = new Som("/sounds/ost.wav");
     }
     
 /*------------SALVAMENTO------------*/
@@ -74,11 +78,31 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("save.dat"))) {
             faseAtual = (Fase) in.readObject();
             faseAtual.setTela(this);
-            faseAtual.recarregarRecursos(); // exemplo: para reconfigurar imagens
+            faseAtual.recarregarRecursos();
+
+            // Atualiza imagens dos botões (pra refletir o estado apertado)
+            for (Personagem p : faseAtual.getPersonagens()) {
+                if (p instanceof Botao) {
+                    ((Botao)p).atualizaImagem();
+                }
+            }
             this.atualizaCamera();
             System.out.println("Jogo carregado com sucesso."); 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+    
+    public void deletarSave() {
+        java.io.File saveFile = new java.io.File("save.dat");
+        if (saveFile.exists()) {
+            if (saveFile.delete()) {
+                System.out.println("Save deletado com sucesso.");
+            } else {
+                System.out.println("Falha ao deletar o save.");
+            }
+        } else {
+            System.out.println("Arquivo de save não existe.");
         }
     }
      
@@ -89,27 +113,26 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
 /*------------CAMERA------------*/
     public void atualizaCamera() {
-    int linha = faseAtual.getHero().getPosicao().getLinha();
-    int coluna = faseAtual.getHero().getPosicao().getColuna();
+        int linha = faseAtual.getHero().getPosicao().getLinha();
+        int coluna = faseAtual.getHero().getPosicao().getColuna();
 
-    int limiteSuperior = cameraLinha + Consts.MARGEM;
-    int limiteInferior = cameraLinha + Consts.RES - Consts.MARGEM - 1;
-    int limiteEsquerdo = cameraColuna + Consts.MARGEM;
-    int limiteDireito = cameraColuna + Consts.RES - Consts.MARGEM - 1;
+        // === Vertical: sempre centraliza ===
+        cameraLinha = linha - Consts.RES / 2;
+        if (cameraLinha < 0) {
+            cameraLinha = 0;
+        } else if (cameraLinha > Consts.MUNDO_ALTURA - Consts.RES) {
+            cameraLinha = Consts.MUNDO_ALTURA - Consts.RES;
+        }
 
-    // Ajusta verticalmente
-    if (linha < limiteSuperior) {
-        cameraLinha = Math.max(0, cameraLinha - (limiteSuperior - linha));
-    } else if (linha > limiteInferior) {
-        cameraLinha = Math.min(Consts.MUNDO_ALTURA - Consts.RES, cameraLinha + (linha - limiteInferior));
-    }
+        // === Horizontal: mantém a lógica da margem ===
+        int limiteEsquerdo = cameraColuna + Consts.MARGEM;
+        int limiteDireito = cameraColuna + Consts.RES - Consts.MARGEM - 1;
 
-    // Ajusta horizontalmente
-    if (coluna < limiteEsquerdo) {
-        cameraColuna = Math.max(0, cameraColuna - (limiteEsquerdo - coluna));
-    } else if (coluna > limiteDireito) {
-        cameraColuna = Math.min(Consts.MUNDO_LARGURA - Consts.RES, cameraColuna + (coluna - limiteDireito));
-    }
+        if (coluna < limiteEsquerdo) {
+            cameraColuna = Math.max(0, cameraColuna - (limiteEsquerdo - coluna));
+        } else if (coluna > limiteDireito) {
+            cameraColuna = Math.min(Consts.MUNDO_LARGURA - Consts.RES, cameraColuna + (coluna - limiteDireito));
+        }
 }
     
     public int getCameraLinha() {
@@ -130,7 +153,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         // Verifica se o tile é transponível
         Tile t = faseAtual.getTile(p.getLinha(), p.getColuna());
-        return t == null || t.isTransponivel();
+        Personagem c = faseAtual.getPersonagem(p.getLinha(), p.getColuna());
+        return (t == null || t.isTransponivel()) && (c==null || c.isTransponivel());
     }
 
 /*------------GRAFICOS------------*/
@@ -160,8 +184,8 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         // Desenhar personagens
         if (!faseAtual.estaVazia()) {
-            cj.desenhaTudo(faseAtual.getEntidades());
-            cj.processaTudo(faseAtual.getEntidades());
+            cj.desenhaTudo(faseAtual.getPersonagens());
+            cj.processaTudo(faseAtual.getPersonagens());
         }
 
         desenharHUD(g2);
@@ -238,6 +262,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     }
     
     public void go() {
+        musicaGameplay.tocarLoop();
         new Thread(() -> {
             long lastTime = System.nanoTime();
             double nsPerTick = 1_000_000_000.0 / 60.0; // 60 FPS alvo
@@ -278,10 +303,10 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             case KeyEvent.VK_S -> faseAtual.getHero().moveDown();
             case KeyEvent.VK_A -> faseAtual.getHero().moveLeft();
             case KeyEvent.VK_D -> faseAtual.getHero().moveRight();
-            case KeyEvent.VK_N -> faseAtual.proximaFase();
             case KeyEvent.VK_G -> salvarJogo(); // G de gravar
             case KeyEvent.VK_L -> carregarJogo(); // L de load
-            case KeyEvent.VK_R -> this.faseAtual.reiniciarJogo();
+            case KeyEvent.VK_R -> this.faseAtual.reiniciarFase();
+            case KeyEvent.VK_N -> this.faseAtual.reiniciarJogo();
         }
 
         this.atualizaCamera();

@@ -1,16 +1,25 @@
 package Modelo;
 
 import Auxiliar.Desenho;
+import Auxiliar.Som;
+import java.io.IOException;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 public class Hero extends Personagem {
-    
+
+    private transient Som falhouSom;
+    private transient Som passouSom;
     private ImageIcon upImage, downImage, leftImage, rightImage;
+
     private boolean hasKey = false;
+
     public Hero(String nomeImagem, Fase faseAtual) {
         super(nomeImagem, faseAtual);
         this.carregarSprites();
         this.imagem = downImage;
+        falhouSom = new Som("/sounds/fail.wav"); 
+        passouSom = new Som("/sounds/win.wav"); 
     }
 
     @Override
@@ -30,7 +39,6 @@ public class Hero extends Personagem {
         return this.hasKey;
     }
 
-
     public void voltaAUltimaPosicao() {
         this.pPosicao.volta();
     }
@@ -46,40 +54,60 @@ public class Hero extends Personagem {
         }
 
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
+
         if (tileAtual != null && tileAtual.isMortal()) {
-            System.out.println("GAME OVER: O herói caiu na água gelada!");
-            Desenho.acessoATelaDoJogo().faseAtual.carregarFase(faseAtual.getFase());
+            System.out.println("O herói caiu na água gelada!");
+            falhouSom.tocarUmaVez();
+            faseAtual.carregarFase(faseAtual.getFase());
             return false;
         }
 
         if (tileAtual != null && tileAtual.isFim()) {
+            passouSom.tocarUmaVez();
             faseAtual.proximaFase();
             return false;
         }
-        
-        for (Personagem p : faseAtual.getEntidades()) {
-        if (p instanceof Food) {
-            if (p.getPosicao().igual(this.getPosicao())) {
-                ((Food) p).checarColisao();
+
+        for (Personagem p : new ArrayList<>(faseAtual.getPersonagens())) {
+            if (p instanceof Food) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Food) p).checarColisao();
+                }
             }
-        }
-        if (p instanceof Key) {
-            if (p.getPosicao().igual(this.getPosicao())) {
-                ((Key) p).checarColisao();
+            if (p instanceof Botao) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Botao) p).checarColisao();
+                }
             }
-        }
-        if (p instanceof Tranca) {
-            if (p.getPosicao().igual(this.getPosicao())) {
-                ((Tranca) p).checarColisao();
+
+            if (p instanceof Key) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Key) p).checarColisao();
+                }
             }
-        }
+            if (p instanceof Tranca) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Tranca) p).checarColisao();
+                }
+            }
       }
-        
         return true;
     }
 
-    private void preencherComAgua(int y, int x){
-        faseAtual.setTile(y, x, new Tile("water.png", true, true,false));
+    private void preencherComAgua(int y, int x) {
+        for (Personagem p : faseAtual.getPersonagens()) {
+            if (p instanceof Botao && p.getPosicao().getLinha() == y && p.getPosicao().getColuna() == x) {
+                return; // Não substituir chão do botão
+            }
+        }
+        faseAtual.setTile(y, x, new Tile("water.png", true, true, false));
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();  // desserializa campos normais
+        // recria o som
+        falhouSom = new Som("/sounds/fail.wav");
+         passouSom = new Som("/sounds/win.wav");
     }
     
     public boolean moveUp() {
