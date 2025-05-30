@@ -137,7 +137,7 @@ public class Fase implements Serializable {
         }else if (pixel == 0xFF404040) { // cinza - backgorund
             this.setTile(y, x, new Tile("background.png", false, false, false)); 
         } else if (pixel == 0xFF0026FF) { // azul - Fim
-            this.setTile(y, x, new Tile("End.png", true, false , true));
+            this.setTile(y, x, new Tile("End.png", true, false , true)); 
         } 
         else if(pixel == 0xFF57007F){ // Rosa Escuro - Bombas
             Bomba b = new Bomba("dinamite.png" ,this);
@@ -146,14 +146,24 @@ public class Fase implements Serializable {
             botao.adicionarBomba(b);
             this.setTile(y, x, new Tile("ground.png", true, false, false));
         }
-        else if (pixel == 0xFF00FF00) { // Verde - Comida
-              Food comida = new Food("peixe.png", this);
-              comida.setPosicao(y, x);
-              this.addMaxComidas();
-              this.AdicionaEntidade(comida);
-              this.setTile(y, x, new Tile("ground.png", true, false, false));
-          } 
-        
+      else if (pixel == 0xFF00FF00) { // VERDE - COMIDA
+                Food comida = new Food("peixe.png", this);
+                comida.setPosicao(y, x);
+                this.AdicionaEntidade(comida);
+                this.setTile(y, x, new Tile("ground.png", true, false, false));
+            } 
+       else if (pixel == 0xFFFFFF00) { // AMARELO CLARO - CHAVE
+                Key chave = new Key("chave.png", this);
+                chave.setPosicao(y, x);
+                this.AdicionaEntidade(chave);
+                this.setTile(y, x, new Tile("ground.png", true, false, false));
+            }
+       else if (pixel == 0xFF7F6A00){ //AMARELO ESCURO - TRANCA
+            Tranca tranca = new Tranca("tranca.png", this);
+            tranca.setPosicao(y, x);
+            this.AdicionaEntidade(tranca);
+            this.setTile(y, x, new Tile("ground.png", true, false, false));
+       }
     }
 
        
