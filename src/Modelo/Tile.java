@@ -24,4 +24,8 @@ public class Tile extends Entidade {
     public boolean isFim() {
         return fim;
     }
+    
+    public boolean isValido(){
+        return isFim() || this.nomeImagem!="ground.png";
+    }
 }

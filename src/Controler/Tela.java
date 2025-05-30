@@ -92,8 +92,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
                             try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(objetoZipado))) {
                                 Personagem p = (Personagem) in.readObject();
                                 p.setPosicao(linha, coluna);
-                           
-                            if(faseAtual.getPersonagem(linha, coluna) != null){
+                            if(faseAtual.getPersonagem(linha, coluna) != null || faseAtual.getTile(linha, coluna).isValido()){
                                 return;
                             }
                                if (p instanceof Hero h) {
