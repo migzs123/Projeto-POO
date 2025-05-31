@@ -16,6 +16,7 @@ public class ControleDeJogo {
     }
 
     public void processaTudo(ArrayList<Personagem> entidades, ArrayList<Personagem> paraMorrer) {  
+
         for (Personagem p : entidades) {
             if (p instanceof Hero) {
                 ((Hero) p).precisaMorrer();

@@ -3,6 +3,8 @@ package Modelo;
 import Auxiliar.Som;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.ImageIcon;
 
 public class Botao extends Personagem {
@@ -27,7 +29,6 @@ public class Botao extends Personagem {
 
     public void checarColisao() {
         Hero heroi = faseAtual.getHero();
-
         if (this.getPosicao().igual(heroi.getPosicao()) && !apertado) {
             apertar();
         }
@@ -36,8 +37,16 @@ public class Botao extends Personagem {
     private void apertar() {
         apertado = true;
         this.imagem = botaoP;
-        atualizaImagem();
-        explodirBombas();
+         // Cria um timer para executar a explosão após 500ms
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                atualizaImagem();
+                explodirBombas();
+                timer.cancel(); // encerra o timer após a execução
+            }
+        }, 100); // 500 milissegundos de atraso
     }
 
     public void adicionarBomba(Bomba b) {
@@ -59,5 +68,13 @@ public class Botao extends Personagem {
         in.defaultReadObject();  // desserializa campos normais
         // recria o som
         somExplosao = new Som("/sounds/explosion.wav");
+    }
+    
+    public ArrayList<Bomba> getBombas(){
+        return this.bombas;
+    }
+    
+    public void setBombas(ArrayList<Bomba> bombas){
+        this.bombas = bombas;
     }
 }

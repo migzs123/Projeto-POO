@@ -2,6 +2,7 @@ package Modelo;
 
 import Auxiliar.Desenho;
 import Auxiliar.Som;
+import auxiliar.Posicao;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -101,6 +102,15 @@ public class Hero extends Personagem {
         return true;
     }
 
+
+    public boolean comparaPosicao(int linha, int coluna){
+        if(this.getPosicao().getColuna() == coluna && this.getPosicao().getLinha() == linha){
+            return true;
+        }
+        return false;
+    }
+    
+
     public void precisaMorrer() {
         if (morto) {
             return;
@@ -123,6 +133,9 @@ public class Hero extends Personagem {
             if (p instanceof Botao && p.getPosicao().getLinha() == y && p.getPosicao().getColuna() == x) {
                 return;
             }
+        }
+        if(faseAtual.isReiniciando()){
+            return;
         }
         faseAtual.setTile(y, x, new Tile("water.png", true, true, false));
     }

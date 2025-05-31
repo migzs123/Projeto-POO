@@ -48,6 +48,7 @@ public class TelaTutorial extends JFrame {
         Tela tela = new Tela();
         tela.setVisible(true);
         tela.createBufferStrategy(2);
+        tela.faseAtual.exportarTodosTipos("exportados");
         tela.go();
     }
 }

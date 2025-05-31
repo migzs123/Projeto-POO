@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 public class Inimigo extends Personagem {
     private int distanciaDetecao = 4;
@@ -178,4 +180,9 @@ public class Inimigo extends Personagem {
     public boolean getDetectou() {
         return this.detectou;
     }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    iniciarMovimentacao(); // reinicia o timer após desserializar
+}
 }
