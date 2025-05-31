@@ -123,6 +123,7 @@ public class Fase implements Serializable {
             todosPersonagens.add(new Tranca("tranca.png", this));
             todosPersonagens.add(new Key("chave.png", this));
             todosPersonagens.add(new Inimigo("inimigo.png", this));
+            todosPersonagens.add(new PowerUp("gelo.png", this));
             // Adicione aqui todas as outras subclasses de Personagem que você tiver
 
             Set<Class<?>> tiposExportados = new HashSet<>();
