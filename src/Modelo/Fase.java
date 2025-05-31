@@ -51,11 +51,6 @@ public class Fase implements Serializable {
        public void carregarFase(int n) {
         reiniciando = true;
         faseID++; // Invalida threads da fase anterior
-        if(n == levelAtual){
-            maxComidas = 0;
-            comidas=0;
-            tentativas++;
-        }
         for (Personagem p : personagens) {
             if (p instanceof Inimigo) {
                 ((Inimigo) p).pararMovimentacao();
@@ -76,7 +71,6 @@ public class Fase implements Serializable {
        public void proximaFase() {
         if (levelAtual < Consts.TOTAL_LEVEIS) {
             maxComidas = 0;
-            tentativas=0;
             comidas = 0;
             pontosFase=0;
             levelAtual++;
@@ -118,37 +112,49 @@ public class Fase implements Serializable {
        }
        
        public void exportarTodosTipos(String pastaDestino) {
-            // Cria lista com instâncias hardcoded de cada tipo de Personagem
-            ArrayList<Personagem> todosPersonagens = new ArrayList<>();
+        // Garante que a pasta 'exportados' exista
+        File pasta = new File(pastaDestino);
+        if (!pasta.exists()) {
+            boolean criada = pasta.mkdirs();
+            if (criada) {
+                System.out.println("Pasta criada: " + pastaDestino);
+            } else {
+                System.err.println("Erro ao criar a pasta: " + pastaDestino);
+                return;
+            }
+        }
 
-            todosPersonagens.add(new Hero("hero.png", this));
-            todosPersonagens.add(new Botao("botao.png", this));
-            todosPersonagens.add(new Bomba("dinamite.png", this));
-            todosPersonagens.add(new Food("peixe.png", this));
-            todosPersonagens.add(new Tranca("tranca.png", this));
-            todosPersonagens.add(new Key("chave.png", this));
-            todosPersonagens.add(new Inimigo("inimigo.png", this));
-            todosPersonagens.add(new PowerUp("gelo.png", this));
-            // Adicione aqui todas as outras subclasses de Personagem que você tiver
+        // Cria lista com instâncias hardcoded de cada tipo de Personagem
+        ArrayList<Personagem> todosPersonagens = new ArrayList<>();
 
-            Set<Class<?>> tiposExportados = new HashSet<>();
+        todosPersonagens.add(new Hero("hero.png", this));
+        todosPersonagens.add(new Botao("botao.png", this));
+        todosPersonagens.add(new Bomba("dinamite.png", this));
+        todosPersonagens.add(new Food("peixe.png", this));
+        todosPersonagens.add(new Tranca("tranca.png", this));
+        todosPersonagens.add(new Key("chave.png", this));
+        todosPersonagens.add(new Inimigo("inimigo.png", this));
+        todosPersonagens.add(new PowerUp("gelo.png", this));
+        // Adicione aqui todas as outras subclasses de Personagem que você tiver
 
-            for (Personagem p : todosPersonagens) {
-                Class<?> tipo = p.getClass();
-                if (!tiposExportados.contains(tipo)) {
-                    String nomeClasse = tipo.getSimpleName();
-                    String nomeZip = pastaDestino + File.separator + nomeClasse + ".zip";
+        Set<Class<?>> tiposExportados = new HashSet<>();
 
-                    try {
-                        ExportadorDePersonagem.salvarPersonagemZip(p, nomeZip);
-                        System.out.println("Exportado: " + nomeClasse + " -> " + nomeZip);
-                        tiposExportados.add(tipo);
-                    } catch (IOException e) {
-                        System.err.println("Erro ao exportar " + nomeClasse + ": " + e.getMessage());
-                    }
+        for (Personagem p : todosPersonagens) {
+            Class<?> tipo = p.getClass();
+            if (!tiposExportados.contains(tipo)) {
+                String nomeClasse = tipo.getSimpleName();
+                String nomeZip = pastaDestino + File.separator + nomeClasse + ".zip";
+
+                try {
+                    ExportadorDePersonagem.salvarPersonagemZip(p, nomeZip);
+                    System.out.println("Exportado: " + nomeClasse + " -> " + nomeZip);
+                    tiposExportados.add(tipo);
+                } catch (IOException e) {
+                    System.err.println("Erro ao exportar " + nomeClasse + ": " + e.getMessage());
                 }
             }
         }
+    }
 
 
        

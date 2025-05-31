@@ -84,7 +84,7 @@ public class Hero extends Personagem {
                 } else if (p instanceof Botao) {
                     ((Botao) p).checarColisao();
                 } else if (p instanceof PowerUp) {
-                    if (powerUp == null || !powerUp.estaAtivo()) {
+                    if (powerUp == null || !powerUp.estaAtivo() || powerUp.getChancesRestantes() !=4) {
                         powerUp = ((PowerUp) p);
                         powerUp.checarColisao();
                     }
