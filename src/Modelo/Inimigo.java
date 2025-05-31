@@ -20,6 +20,14 @@ public class Inimigo extends Personagem {
     @Override
     protected void carregarSprites() {}
 
+    public void checarColisao() {
+       Hero hero = faseAtual.getHero();
+        if (this.getPosicao().igual(hero.getPosicao())){
+           faseAtual.setTile(this.getPosicao().getLinha(), this.getPosicao().getColuna(), new Tile("water.png", true, true,false));
+           
+        } 
+    }
+    
     public void deteccao() {
         int linhaHeroi = faseAtual.getHero().getPosicao().getLinha();
         int colunaHeroi = faseAtual.getHero().getPosicao().getColuna();
@@ -31,7 +39,7 @@ public class Inimigo extends Personagem {
     }
 
     public void iniciarMovimentacao() {
-        timer = new Timer(500, new ActionListener() {
+        timer = new Timer(250, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 deteccao(); // atualiza detecção
@@ -74,8 +82,15 @@ public class Inimigo extends Personagem {
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
 
         for (Personagem p : new ArrayList<>(faseAtual.getPersonagens())) {
-            if (p instanceof Botao && p.getPosicao().igual(this.getPosicao())) {
-                ((Botao) p).checarColisao();
+            if (p instanceof Botao) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Botao) p).checarColisao();
+                }
+            }
+            if(p instanceof Hero){
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    this.checarColisao();
+                }
             }
         }
         return true;

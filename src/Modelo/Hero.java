@@ -61,6 +61,11 @@ public class Hero extends Personagem {
                 if (p.getPosicao().igual(this.getPosicao())) {
                     ((Botao) p).checarColisao();
                 }
+            if (p instanceof Inimigo) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Inimigo) p).checarColisao();
+                }
+            }
             }
         }
         return true;
