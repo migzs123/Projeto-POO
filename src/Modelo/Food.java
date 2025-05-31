@@ -21,7 +21,7 @@ public class Food extends Personagem{
         Hero hero = faseAtual.getHero();
         if (this.getPosicao().igual(hero.getPosicao())){
             pontoSom.tocarUmaVez();
-            faseAtual.adicionarPontos(1);
+            faseAtual.adicionarPontos(100);
             faseAtual.adicionarComida();
             faseAtual.RemoveEntidade(this);
             System.out.println("Comida coletada! Pontuação atual: " + faseAtual.getPontos());

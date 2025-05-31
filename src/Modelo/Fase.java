@@ -2,6 +2,7 @@
 package Modelo;
 
 import Auxiliar.Consts;
+import Auxiliar.Som;
 import Controler.Tela;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -25,8 +26,10 @@ public class Fase implements Serializable {
        private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
        private int tentativas;
        private int pontos;
+       private int pontosFase;
        private int comidas;
        private int maxComidas;
+       private transient Som passouSom;
        
        public Fase(Tela tela, int levelAtual){
             this.tela = tela;
@@ -34,34 +37,35 @@ public class Fase implements Serializable {
             this.personagensParaRemover = new ArrayList<>(); 
             this.personagens = new ArrayList<>();            
             pontos = 0;
+            pontosFase =0;
+            passouSom = new Som("/sounds/win.wav"); 
             carregarFase(levelAtual);
         }
-
-       
        
        public void carregarFase(int n) {
-        personagens = new ArrayList<>();
-        personagensParaRemover = new ArrayList<>();
-        mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
-        
-        try {
-             this.ConstroiMundo(Consts.PATH + n +  "mapa.png", tela); // Padrão: 1mapa.png, 2mapa.png, etc.
-        } catch (IOException ex) {
-            Logger.getLogger(Tela.class.getName()).log(Level.SEVERE, null, ex);
+            personagens = new ArrayList<>();
+            personagensParaRemover = new ArrayList<>();
+            mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
+
+            try {
+                 this.ConstroiMundo(Consts.PATH + n +  "mapa.png", tela); // Padrão: 1mapa.png, 2mapa.png, etc.
+            } catch (IOException ex) {
+                Logger.getLogger(Tela.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-    }
        
        public void proximaFase() {
         if (levelAtual < Consts.TOTAL_LEVEIS) {
             maxComidas = 0;
             tentativas=0;
             comidas = 0;
+            pontosFase=0;
             levelAtual++;
-           
+            passouSom.tocarUmaVez();
             this.carregarFase(levelAtual);
         } else {
-            // Jogo completado
-            System.out.println("Parabéns! Você completou todos os níveis!");
+           tela.irParaFim();
+           
         }
     }
        
@@ -70,6 +74,7 @@ public class Fase implements Serializable {
            tentativas =0;
            comidas =0;
            pontos=0;
+           pontosFase=0;
            levelAtual=1;
            carregarFase(1);
            tela.deletarSave();
@@ -82,6 +87,10 @@ public class Fase implements Serializable {
            maxComidas = 0;
            tentativas++;
            comidas =0;
+           if(this.pontos != 0){
+               this.pontos -= pontosFase; 
+           }
+           pontosFase=0;
            carregarFase(levelAtual);
            if (tela != null) {
             tela.atualizaCamera();
@@ -135,7 +144,7 @@ public class Fase implements Serializable {
                 throw e;
             }
     }
-       
+        
        private void processaPixel(int pixel, int y, int x) throws IOException {
             if (pixel == 0xFFFFFFFF) { // branco - chão
                 this.setTile(y, x, new Tile("ground.png", true, false, false));
@@ -156,7 +165,6 @@ public class Fase implements Serializable {
            else if (pixel == 0xFFFFF200) { // Verde - PowerUp
                 PowerUp powerUpItem = new PowerUp("gelo.png", this); 
                 powerUpItem.setPosicao(y, x);
-
                 this.AdicionaEntidade(powerUpItem);
                 this.setTile(y, x, new Tile("ground.png", true, false, false)); 
             } 
@@ -221,6 +229,12 @@ public class Fase implements Serializable {
         }
         return null;
     }  
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();  // desserializa campos normais
+        // recria o som
+        passouSom = new Som("/sounds/win.wav");
+    }
        
     public ArrayList<Personagem> getPersonagens(){
          return personagens;
@@ -264,6 +278,7 @@ public class Fase implements Serializable {
     
     public void adicionarPontos(int qtd){
         this.pontos += qtd;
+        this.pontosFase += qtd;
     }
     
     public int getComidas(){
@@ -282,11 +297,6 @@ public class Fase implements Serializable {
         if(this.comidas<this.maxComidas){
             this.comidas++;
         }
-    }
-    public void transformarAguaEmGelo(int y, int x) {
-        Tile novoTileDeGelo = new Tile("ground.png", true, false, false);
-        this.setTile(y, x, novoTileDeGelo);
-        System.out.println("Tile em (" + y + "," + x + ") foi transformado de água para gelo!");
     }
    
     public void marcarParaRemocao(Personagem p) {

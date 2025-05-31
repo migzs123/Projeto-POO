@@ -1,6 +1,7 @@
 package Modelo;
 
 import Auxiliar.Consts;
+import Auxiliar.Som;
 import Controler.Tela;
 
 import javax.swing.*;
@@ -9,7 +10,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class TelaTutorial extends JFrame {
-    public TelaTutorial() {
+    public TelaTutorial(Som menu) {
         setTitle("Tutorial");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(Consts.RES * Consts.CELL_SIDE, Consts.RES * Consts.CELL_SIDE);
@@ -36,6 +37,7 @@ public class TelaTutorial extends JFrame {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                menu.parar();
                 iniciarJogo();
             }
         });

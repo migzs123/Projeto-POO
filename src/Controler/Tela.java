@@ -13,6 +13,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -26,6 +27,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.ImageIcon;
 
 public class Tela extends javax.swing.JFrame implements MouseListener, KeyListener {
 
@@ -38,11 +40,16 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
     
     private Som musicaGameplay;
     
+    private Image chaveIcon;
+    private Image powerUp;
+    
     private Font pixelFont;
     private final Set<Integer> teclasPressionadas = new HashSet<>();
     
 /*------------CONSTRUTOR------------*/
     public Tela() {
+        chaveIcon = new ImageIcon(getClass().getResource("/imgs/chave.png")).getImage();
+        powerUp = new ImageIcon(getClass().getResource("/imgs/gelo.png")).getImage();
         Desenho.setCenario(this);
         initComponents();
         this.addMouseListener(this);
@@ -248,7 +255,40 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         int larguraPontos = fm.stringWidth(textoPontos);
         g2d.drawString(textoPontos, larguraTela - larguraPontos - 50, 730);
+        Hero hero = faseAtual.getHero();
+        
+        int xIcon = 100;
+        int yIcon = 685; // um pouco acima da borda inferior
+        int tamanhoIcone = 70;
+        int espacamento = 10;
+        
+        
+        
+        if (hero.getKeyStatus()) {
+            g2d.drawImage(chaveIcon, xIcon, yIcon, tamanhoIcone, tamanhoIcone, null);
+
+            xIcon += tamanhoIcone + espacamento;
+        }
+
+        
+        if (hero.getPowerUp() != null && hero.getPowerUp().estaAtivo()) {
+            g2d.drawImage(powerUp, xIcon, yIcon, tamanhoIcone, tamanhoIcone, null);
+            g2d.setColor(new Color(0xFFFF0000));
+    
+            String texto = "" + hero.getPowerUp().getChancesRestantes();
+            fm = g2d.getFontMetrics();
+            int textoLargura = fm.stringWidth(texto);
+            int textoAltura = fm.getAscent(); 
+
+            int textoX = xIcon + (tamanhoIcone - textoLargura) / 2;
+            int textoY = yIcon + (tamanhoIcone + textoAltura) / 2;
+
+            g2d.drawString(texto, textoX, textoY+12);
+        }
     }
+
+
+
 
 
     private void carregarFontePixel() {
@@ -366,6 +406,13 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    public void irParaFim() {
+        dispose();
+        musicaGameplay.parar();
+        this.deletarSave();
+        new TelaFim(faseAtual.getTentativas(), faseAtual.getPontos());
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
 

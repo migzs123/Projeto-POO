@@ -1,13 +1,15 @@
 package Modelo;
 
 import Auxiliar.Consts;
+import Auxiliar.Som;
 import Controler.Tela;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class MenuPrincipal extends JFrame {
+    private Som menu = new Som("/sounds/menu.wav");
     public MenuPrincipal() {
+        menu.tocarLoop();
         setTitle("Menu Principal");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(Consts.RES * Consts.CELL_SIDE + getInsets().left + getInsets().right,
@@ -60,7 +62,7 @@ public class MenuPrincipal extends JFrame {
 
     private void iniciarJogo() {
         dispose();
-        new TelaTutorial();
+        new TelaTutorial(menu);
     }
 
     private void carregarJogo() {
