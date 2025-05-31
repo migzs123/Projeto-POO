@@ -27,6 +27,7 @@ public class Fase implements Serializable {
        private Hero hero;
        private Botao botao;
        private ArrayList<Personagem> personagens;
+       private ArrayList<Personagem> personagensParaRemover;
        private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
        private int tentativas;
        private int pontos;
@@ -34,11 +35,14 @@ public class Fase implements Serializable {
        private int maxComidas;
        
        public Fase(Tela tela, int levelAtual){
-           this.tela = tela;
-           this.levelAtual = levelAtual;
-           this.carregarFase(levelAtual);
-           pontos = 0;
-       }
+            this.tela = tela;
+            this.levelAtual = levelAtual;
+            this.personagensParaRemover = new ArrayList<>(); 
+            this.personagens = new ArrayList<>();            
+            pontos = 0;
+            carregarFase(levelAtual);
+        }
+
        
        
        public void carregarFase(int n) {
@@ -49,7 +53,9 @@ public class Fase implements Serializable {
             comidas=0;
             tentativas++;
         }
+
         personagens = new ArrayList<>();
+        personagensParaRemover = new ArrayList<>();
         mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
         
         try {
@@ -82,6 +88,9 @@ public class Fase implements Serializable {
            levelAtual=1;
            carregarFase(1);
            tela.deletarSave();
+            if (tela != null) {
+                tela.atualizaCamera();
+            }
        }
        
        public void reiniciarFase(){
@@ -89,6 +98,9 @@ public class Fase implements Serializable {
            tentativas++;
            comidas =0;
            carregarFase(levelAtual);
+           if (tela != null) {
+            tela.atualizaCamera();
+            }   
        }
        
        public void exportarTodosTipos(String pastaDestino) {
@@ -161,7 +173,8 @@ public class Fase implements Serializable {
                 }
 
                 if (tempHero != null) {
-                    this.AdicionaEntidade(tempHero); // adiciona no final
+                    tempHero.resetarMorte();
+                    this.AdicionaEntidade(tempHero);
                     this.hero = tempHero;
                 }
 
@@ -188,12 +201,20 @@ public class Fase implements Serializable {
             botao.adicionarBomba(b);
             this.setTile(y, x, new Tile("ground.png", true, false, false));
         }
-      else if (pixel == 0xFF00FF00) { // VERDE - COMIDA
-                Food comida = new Food("peixe.png", this);
-                comida.setPosicao(y, x);
-                this.AdicionaEntidade(comida);
-                this.setTile(y, x, new Tile("ground.png", true, false, false));
-            } 
+
+        else if (pixel == 0xFF00FF00) { // Verde - Comida
+              Food comida = new Food("peixe.png", this);
+              comida.setPosicao(y, x);
+              this.addMaxComidas();
+              this.AdicionaEntidade(comida);
+              this.setTile(y, x, new Tile("ground.png", true, false, false));
+          } 
+        else if (pixel == 0xFF4800FF) { // Roxo - Inimigo
+              Inimigo inimigo = new Inimigo("inimigo.png", this);
+              inimigo.setPosicao(y, x);
+              this.AdicionaEntidade(inimigo);
+              this.setTile(y, x, new Tile("ground.png", true, false, false));
+          }  
        else if (pixel == 0xFFFFFF00) { // AMARELO CLARO - CHAVE
                 Key chave = new Key("chave.png", this);
                 chave.setPosicao(y, x);
@@ -325,4 +346,13 @@ public class Fase implements Serializable {
     public boolean isReiniciando() {
      return this.reiniciando;
  }
+
+    public void marcarParaRemocao(Personagem p) {
+        personagensParaRemover.add(p);
+    }
+    
+    public ArrayList<Personagem> getPersonagensMarcados(){
+        return this.personagensParaRemover;
+    }
+
 }

@@ -298,7 +298,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
         // Desenhar personagens
         if (!faseAtual.estaVazia()) {
             cj.desenhaTudo(faseAtual.getPersonagens());
-            cj.processaTudo(faseAtual.getPersonagens());
+            cj.processaTudo(faseAtual.getPersonagens(), faseAtual.getPersonagensMarcados());
         }
 
         desenharHUD(g2);
