@@ -99,7 +99,8 @@ public class Hero extends Personagem {
             return true;
         }
         return false;
-
+    }
+    
     public void precisaMorrer() {
         if (morto) return; // Já morreu, não fazer nada
 
