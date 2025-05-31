@@ -122,6 +122,9 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
                                 else if (p instanceof Tranca || p instanceof Key){
                                     p.setFase(faseAtual);
                                 }
+                               else if (p instanceof Inimigo){
+                                    p.setFase(faseAtual);
+                                }
                                 // Adiciona o personagem à fase
                                 faseAtual.AdicionaEntidade(p);
                                 }
