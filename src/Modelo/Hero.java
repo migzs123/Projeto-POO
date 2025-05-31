@@ -10,6 +10,7 @@ public class Hero extends Personagem {
 
     private transient Som falhouSom;
     private transient Som passouSom;
+    private boolean morto = false;
     private ImageIcon upImage, downImage, leftImage, rightImage;
 
     private boolean hasKey = false;
@@ -55,13 +56,6 @@ public class Hero extends Personagem {
 
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
 
-        if (tileAtual != null && tileAtual.isMortal()) {
-            System.out.println("O herói caiu na água gelada!");
-            falhouSom.tocarUmaVez();
-            faseAtual.carregarFase(faseAtual.getFase());
-            return false;
-        }
-
         if (tileAtual != null && tileAtual.isFim()) {
             passouSom.tocarUmaVez();
             faseAtual.proximaFase();
@@ -78,6 +72,11 @@ public class Hero extends Personagem {
                 if (p.getPosicao().igual(this.getPosicao())) {
                     ((Botao) p).checarColisao();
                 }
+            if (p instanceof Inimigo) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Inimigo) p).checarColisao();
+                }
+            }
             }
 
             if (p instanceof Key) {
@@ -92,6 +91,20 @@ public class Hero extends Personagem {
             }
       }
         return true;
+    }
+    public void precisaMorrer() {
+        if (morto) return; // Já morreu, não fazer nada
+
+        int linha = this.getPosicao().getLinha();
+        int coluna = this.getPosicao().getColuna();
+        Tile tileAtual = faseAtual.getTile(linha, coluna);
+
+        if (tileAtual != null && tileAtual.isMortal()) {
+            System.out.println("O herói caiu na água gelada!");
+            falhouSom.tocarUmaVez();
+            morto = true;
+            faseAtual.reiniciarFase();
+        }
     }
 
     private void preencherComAgua(int y, int x) {
@@ -157,4 +170,8 @@ public class Hero extends Personagem {
         }
         return false;
     }
+    
+   public void resetarMorte(){
+      this.morto=false;
+   }
 }
