@@ -3,6 +3,7 @@ package Modelo;
 
 import Auxiliar.Consts;
 import Auxiliar.ExportadorDePersonagem;
+import Auxiliar.Som;
 import Controler.Tela;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -31,8 +32,10 @@ public class Fase implements Serializable {
        private Tile[][] mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
        private int tentativas;
        private int pontos;
+       private int pontosFase;
        private int comidas;
        private int maxComidas;
+       private transient Som passouSom;
        
        public Fase(Tela tela, int levelAtual){
             this.tela = tela;
@@ -40,10 +43,10 @@ public class Fase implements Serializable {
             this.personagensParaRemover = new ArrayList<>(); 
             this.personagens = new ArrayList<>();            
             pontos = 0;
+            pontosFase =0;
+            passouSom = new Som("/sounds/win.wav"); 
             carregarFase(levelAtual);
         }
-
-       
        
        public void carregarFase(int n) {
         reiniciando = true;
@@ -71,12 +74,13 @@ public class Fase implements Serializable {
             maxComidas = 0;
             tentativas=0;
             comidas = 0;
+            pontosFase=0;
             levelAtual++;
-           
+            passouSom.tocarUmaVez();
             this.carregarFase(levelAtual);
         } else {
-            // Jogo completado
-            System.out.println("Parabéns! Você completou todos os níveis!");
+           tela.irParaFim();
+           
         }
     }
        
@@ -85,6 +89,7 @@ public class Fase implements Serializable {
            tentativas =0;
            comidas =0;
            pontos=0;
+           pontosFase=0;
            levelAtual=1;
            carregarFase(1);
            tela.deletarSave();
@@ -97,6 +102,10 @@ public class Fase implements Serializable {
            maxComidas = 0;
            tentativas++;
            comidas =0;
+           if(this.pontos != 0){
+               this.pontos -= pontosFase; 
+           }
+           pontosFase=0;
            carregarFase(levelAtual);
            if (tela != null) {
             tela.atualizaCamera();
@@ -184,53 +193,57 @@ public class Fase implements Serializable {
                 throw e;
             }
     }
-       
+        
        private void processaPixel(int pixel, int y, int x) throws IOException {
-        if (pixel == 0xFFFFFFFF) { // branco - chão
-            this.setTile(y, x, new Tile("ground.png", true, false, false));
-        } else if (pixel == 0xFF000000) { // preto - parede
-            this.setTile(y, x, new Tile("wall.png", false,false,false));
-        }else if (pixel == 0xFF404040) { // cinza - backgorund
-            this.setTile(y, x, new Tile("background.png", false, false, false)); 
-        } else if (pixel == 0xFF0026FF) { // azul - Fim
-            this.setTile(y, x, new Tile("End.png", true, false , true)); 
-        } 
-        else if(pixel == 0xFF57007F){ // Rosa Escuro - Bombas
-            Bomba b = new Bomba("dinamite.png" ,this);
-            b.setPosicao(y, x);
-            this.AdicionaEntidade(b);
-            botao.adicionarBomba(b);
-            this.setTile(y, x, new Tile("ground.png", true, false, false));
-        }
-
-        else if (pixel == 0xFF00FF00) { // Verde - Comida
-              Food comida = new Food("peixe.png", this);
-              comida.setPosicao(y, x);
-              this.addMaxComidas();
-              this.AdicionaEntidade(comida);
-              this.setTile(y, x, new Tile("ground.png", true, false, false));
-          } 
-        else if (pixel == 0xFF4800FF) { // Roxo - Inimigo
-              Inimigo inimigo = new Inimigo("inimigo.png", this);
-              inimigo.setPosicao(y, x);
-              this.AdicionaEntidade(inimigo);
-              this.setTile(y, x, new Tile("ground.png", true, false, false));
-          }  
-       else if (pixel == 0xFFFFFF00) { // AMARELO CLARO - CHAVE
-                Key chave = new Key("chave.png", this);
-                chave.setPosicao(y, x);
-                this.AdicionaEntidade(chave);
+            if (pixel == 0xFFFFFFFF) { // branco - chão
+                this.setTile(y, x, new Tile("ground.png", true, false, false));
+            } else if (pixel == 0xFF000000) { // preto - parede
+                this.setTile(y, x, new Tile("wall.png", false,false,false));
+            }else if (pixel == 0xFF404040) { // cinza - backgorund
+                this.setTile(y, x, new Tile("background.png", false, false, false)); 
+            } else if (pixel == 0xFF0026FF) { // azul - Fim
+                this.setTile(y, x, new Tile("End.png", true, false , true)); 
+            } 
+            else if (pixel == 0xFF57007F){ // Rosa Escuro - Bombas
+                Bomba b = new Bomba("dinamite.png" ,this);
+                b.setPosicao(y, x);
+                this.AdicionaEntidade(b);
+                botao.adicionarBomba(b);
                 this.setTile(y, x, new Tile("ground.png", true, false, false));
             }
-       else if (pixel == 0xFF7F6A00){ //AMARELO ESCURO - TRANCA
-            Tranca tranca = new Tranca("tranca.png", this);
-            tranca.setPosicao(y, x);
-            this.AdicionaEntidade(tranca);
-            this.setTile(y, x, new Tile("ground.png", true, false, false));
-       }
+           else if (pixel == 0xFFFFF200) { // Verde - PowerUp
+                PowerUp powerUpItem = new PowerUp("gelo.png", this); 
+                powerUpItem.setPosicao(y, x);
+                this.AdicionaEntidade(powerUpItem);
+                this.setTile(y, x, new Tile("ground.png", true, false, false)); 
+            } 
+            else if (pixel == 0xFF00FF00) { // Verde - Comida
+                  Food comida = new Food("peixe.png", this);
+                  comida.setPosicao(y, x);
+                  this.addMaxComidas();
+                  this.AdicionaEntidade(comida);
+                  this.setTile(y, x, new Tile("ground.png", true, false, false));
+              } 
+            else if (pixel == 0xFF4800FF) { // Roxo - Inimigo
+                  Inimigo inimigo = new Inimigo("inimigo.png", this);
+                  inimigo.setPosicao(y, x);
+                  this.AdicionaEntidade(inimigo);
+                  this.setTile(y, x, new Tile("ground.png", true, false, false));
+              }  
+            else if (pixel == 0xFFFFFF00) { // AMARELO CLARO - CHAVE
+                     Key chave = new Key("chave.png", this);
+                     chave.setPosicao(y, x);
+                     this.AdicionaEntidade(chave);
+                     this.setTile(y, x, new Tile("ground.png", true, false, false));
+                 }
+            else if (pixel == 0xFF7F6A00){ //AMARELO ESCURO - TRANCA
+                 Tranca tranca = new Tranca("tranca.png", this);
+                 tranca.setPosicao(y, x);
+                 this.AdicionaEntidade(tranca);
+                 this.setTile(y, x, new Tile("ground.png", true, false, false));
+            }
     }
-
-       
+  
        public void recarregarRecursos() {
             // Recarrega imagens dos personagens
             for (Personagem p : personagens) {
@@ -270,6 +283,12 @@ public class Fase implements Serializable {
         }
         return null;
     }  
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();  // desserializa campos normais
+        // recria o som
+        passouSom = new Som("/sounds/win.wav");
+    }
        
     public ArrayList<Personagem> getPersonagens(){
          return personagens;
@@ -313,6 +332,7 @@ public class Fase implements Serializable {
     
     public void adicionarPontos(int qtd){
         this.pontos += qtd;
+        this.pontosFase += qtd;
     }
     
     public int getComidas(){
@@ -347,7 +367,6 @@ public class Fase implements Serializable {
     public boolean isReiniciando() {
      return this.reiniciando;
  }
-
     public void marcarParaRemocao(Personagem p) {
         personagensParaRemover.add(p);
     }

@@ -4,24 +4,25 @@ import Auxiliar.Desenho;
 import Auxiliar.Som;
 import auxiliar.Posicao;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 public class Hero extends Personagem {
 
     private transient Som falhouSom;
-    private transient Som passouSom;
+
     private boolean morto = false;
     private ImageIcon upImage, downImage, leftImage, rightImage;
-
     private boolean hasKey = false;
+    private PowerUp powerUp;
 
     public Hero(String nomeImagem, Fase faseAtual) {
         super(nomeImagem, faseAtual);
         this.carregarSprites();
         this.imagem = downImage;
-        falhouSom = new Som("/sounds/fail.wav"); 
-        passouSom = new Som("/sounds/win.wav"); 
+        falhouSom = new Som("/sounds/fail.wav");  
+        powerUp = null;
     }
 
     @Override
@@ -31,13 +32,13 @@ public class Hero extends Personagem {
         leftImage = carregarImagem(nomeImagem.replace(".png", "") + "_left.png");
         rightImage = carregarImagem(nomeImagem.replace(".png", "") + "_right.png");
     }
-    
-    public void getKey(){
+
+    public void getKey() {
         this.hasKey = true;
         System.out.println("hasKey status:" + this.hasKey);
     }
-    
-    public boolean getKeyStatus(){
+
+    public boolean getKeyStatus() {
         return this.hasKey;
     }
 
@@ -56,43 +57,51 @@ public class Hero extends Personagem {
         }
 
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
-
+        
+         if (tileAtual != null && tileAtual.isMortal()) {
+            if (powerUp != null && powerUp.estaAtivo()) {
+                faseAtual.setTile(this.getPosicao().getLinha(), this.getPosicao().getColuna(), new Tile("ground.png", true, false, false));
+                powerUp.usarChance();
+                return true;
+            } else {
+                this.precisaMorrer();  
+                return false;
+            }
+        }
+         
         if (tileAtual != null && tileAtual.isFim()) {
-            passouSom.tocarUmaVez();
             faseAtual.proximaFase();
             return false;
         }
 
-        for (Personagem p : new ArrayList<>(faseAtual.getPersonagens())) {
-            if (p instanceof Food) {
-                if (p.getPosicao().igual(this.getPosicao())) {
-                    ((Food) p).checarColisao();
-                }
-            }
-            if (p instanceof Botao) {
-                if (p.getPosicao().igual(this.getPosicao())) {
-                    ((Botao) p).checarColisao();
-                }
-            if (p instanceof Inimigo) {
-                if (p.getPosicao().igual(this.getPosicao())) {
-                    ((Inimigo) p).checarColisao();
-                }
-            }
-            }
+        if (tileAtual != null && !tileAtual.isTransponivel()) {
+            this.voltaAUltimaPosicao();
+            return false;
+        }
 
-            if (p instanceof Key) {
-                if (p.getPosicao().igual(this.getPosicao())) {
+        for (Personagem p : new ArrayList<>(faseAtual.getPersonagens())) {
+            if (p != null && p.getPosicao() != null && p.getPosicao().igual(this.getPosicao())) {
+                if (p instanceof Food) {
+                    ((Food) p).checarColisao();
+                } else if (p instanceof Botao) {
+                    ((Botao) p).checarColisao();
+                } else if (p instanceof PowerUp) {
+                    if (powerUp == null || !powerUp.estaAtivo()) {
+                        powerUp = ((PowerUp) p);
+                        powerUp.checarColisao();
+                    }
+                } else if (p instanceof Inimigo) {
+                    ((Inimigo) p).checarColisao();
+                } else if (p instanceof Key) {
                     ((Key) p).checarColisao();
-                }
-            }
-            if (p instanceof Tranca) {
-                if (p.getPosicao().igual(this.getPosicao())) {
+                } else if (p instanceof Tranca) {
                     ((Tranca) p).checarColisao();
                 }
             }
-      }
+        }
         return true;
     }
+
 
     public boolean comparaPosicao(int linha, int coluna){
         if(this.getPosicao().getColuna() == coluna && this.getPosicao().getLinha() == linha){
@@ -101,26 +110,28 @@ public class Hero extends Personagem {
         return false;
     }
     
-    public void precisaMorrer() {
-        if (morto) return; // Já morreu, não fazer nada
 
+    public void precisaMorrer() {
+        if (morto) {
+            return;
+        }
         int linha = this.getPosicao().getLinha();
         int coluna = this.getPosicao().getColuna();
         Tile tileAtual = faseAtual.getTile(linha, coluna);
-
         if (tileAtual != null && tileAtual.isMortal()) {
             System.out.println("O herói caiu na água gelada!");
-            falhouSom.tocarUmaVez();
+            if (falhouSom != null) {
+                falhouSom.tocarUmaVez();
+            }
             morto = true;
             faseAtual.reiniciarFase();
         }
-
     }
 
     private void preencherComAgua(int y, int x) {
         for (Personagem p : faseAtual.getPersonagens()) {
             if (p instanceof Botao && p.getPosicao().getLinha() == y && p.getPosicao().getColuna() == x) {
-                return; // Não substituir chão do botão
+                return;
             }
         }
         if(faseAtual.isReiniciando()){
@@ -128,21 +139,34 @@ public class Hero extends Personagem {
         }
         faseAtual.setTile(y, x, new Tile("water.png", true, true, false));
     }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();  // desserializa campos normais
-        // recria o som
-        falhouSom = new Som("/sounds/fail.wav");
-         passouSom = new Som("/sounds/win.wav");
+    
+     private void preencherComGelo(int y, int x) {
+        for (Personagem p : faseAtual.getPersonagens()) {
+            if (p instanceof Botao && p.getPosicao().getLinha() == y && p.getPosicao().getColuna() == x) {
+                return;
+            }
+        }
+        faseAtual.setTile(y, x, new Tile("ground.png", true, false, false));
     }
     
+   public PowerUp getPowerUp(){
+       return powerUp;
+   }
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        falhouSom = new Som("/sounds/fail.wav");
+    }
+
     public boolean moveUp() {
         this.imagem = upImage;
         int linhaAnterior = pPosicao.getLinha();
         int colunaAnterior = pPosicao.getColuna();
 
-        if (super.moveUp() && validaPosicao()) {
+        if (super.moveUp() && validaPosicao()) { // validaPosicao pode mudar o estado de powerupAtivo
+            
             preencherComAgua(linhaAnterior, colunaAnterior);
+            
             return true;
         }
         return false;
@@ -155,6 +179,7 @@ public class Hero extends Personagem {
 
         if (super.moveDown() && validaPosicao()) {
             preencherComAgua(linhaAnterior, colunaAnterior);
+            
             return true;
         }
         return false;
@@ -178,13 +203,17 @@ public class Hero extends Personagem {
         int colunaAnterior = pPosicao.getColuna();
 
         if (super.moveRight() && validaPosicao()) {
-            preencherComAgua(linhaAnterior, colunaAnterior);
+             preencherComAgua(linhaAnterior, colunaAnterior);
             return true;
         }
         return false;
     }
+
+    public void resetarMorte() {
+        this.morto = false;
+    }
     
-   public void resetarMorte(){
-      this.morto=false;
-   }
+    public void removerPowerUp() {
+        this.powerUp = null;
+    }
 }
