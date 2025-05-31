@@ -139,24 +139,23 @@ public class Fase implements Serializable {
         } else if (pixel == 0xFF0026FF) { // azul - Fim
             this.setTile(y, x, new Tile("End.png", true, false , true));
         } 
-        else if(pixel == 0xFF57007F){ // Rosa Escuro - Bombas
+        else if (pixel == 0xFF57007F){ // Rosa Escuro - Bombas
             Bomba b = new Bomba("dinamite.png" ,this);
             b.setPosicao(y, x);
             this.AdicionaEntidade(b);
             botao.adicionarBomba(b);
             this.setTile(y, x, new Tile("ground.png", true, false, false));
         }
-        else if (pixel == 0xFF00FF00) { // Verde - Comida
-              Food comida = new Food("peixe.png", this);
-              comida.setPosicao(y, x);
-              this.addMaxComidas();
-              this.AdicionaEntidade(comida);
-              this.setTile(y, x, new Tile("ground.png", true, false, false));
-          } 
+       else if (pixel == 0xFF00FF00) { // Verde - PowerUp
+            PowerUp powerUpItem = new PowerUp("gelo.png", this); 
+            powerUpItem.setPosicao(y, x);
+            
+            this.AdicionaEntidade(powerUpItem);
+            this.setTile(y, x, new Tile("ground.png", true, false, false)); // Coloca um chão sob o power-up
+        } 
         
     }
-
-       
+  
        public void recarregarRecursos() {
             for (Personagem p : personagens) {
                 p.carregarImagem(); // Hero e outros devem implementar isso
@@ -252,6 +251,12 @@ public class Fase implements Serializable {
         if(this.comidas<this.maxComidas){
             this.comidas++;
         }
+    }
+    
+    public void transformarAguaEmGelo(int y, int x) {
+        Tile novoTileDeGelo = new Tile("ground.png", true, false, false);
+        this.setTile(y, x, novoTileDeGelo);
+        System.out.println("Tile em (" + y + "," + x + ") foi transformado de água para gelo!");
     }
    
 }
