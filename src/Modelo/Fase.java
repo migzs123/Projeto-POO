@@ -56,8 +56,12 @@ public class Fase implements Serializable {
             comidas=0;
             tentativas++;
         }
-
-        personagens = new ArrayList<>();
+        for (Personagem p : personagens) {
+            if (p instanceof Inimigo) {
+                ((Inimigo) p).pararMovimentacao();
+            }
+        }
+        personagens= new ArrayList<>();
         personagensParaRemover = new ArrayList<>();
         mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
         
@@ -110,6 +114,7 @@ public class Fase implements Serializable {
            if (tela != null) {
             tela.atualizaCamera();
             }   
+           
        }
        
        public void exportarTodosTipos(String pastaDestino) {
@@ -205,6 +210,9 @@ public class Fase implements Serializable {
             } else if (pixel == 0xFF0026FF) { // azul - Fim
                 this.setTile(y, x, new Tile("End.png", true, false , true)); 
             } 
+            else if (pixel == 0xFFFF6A00) {
+                this.setTile(y, x, new Tile("water.png", true, true , true)); 
+            } 
             else if (pixel == 0xFF57007F){ // Rosa Escuro - Bombas
                 Bomba b = new Bomba("dinamite.png" ,this);
                 b.setPosicao(y, x);
@@ -226,10 +234,13 @@ public class Fase implements Serializable {
                   this.setTile(y, x, new Tile("ground.png", true, false, false));
               } 
             else if (pixel == 0xFF4800FF) { // Roxo - Inimigo
+                
                   Inimigo inimigo = new Inimigo("inimigo.png", this);
                   inimigo.setPosicao(y, x);
                   this.AdicionaEntidade(inimigo);
+                  
                   this.setTile(y, x, new Tile("ground.png", true, false, false));
+
               }  
             else if (pixel == 0xFFFFFF00) { // AMARELO CLARO - CHAVE
                      Key chave = new Key("chave.png", this);

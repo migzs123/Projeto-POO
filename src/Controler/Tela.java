@@ -66,7 +66,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
                     Consts.RES * Consts.CELL_SIDE + getInsets().top + getInsets().bottom);
         carregarFontePixel();
         setLocationRelativeTo(null);
-        faseAtual = new Fase(this, 1);
+        faseAtual = new Fase(this, 5);
         this.atualizaCamera();
         
         this.addWindowListener(new java.awt.event.WindowAdapter() {

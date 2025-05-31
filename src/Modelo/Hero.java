@@ -2,9 +2,7 @@ package Modelo;
 
 import Auxiliar.Desenho;
 import Auxiliar.Som;
-import auxiliar.Posicao;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 

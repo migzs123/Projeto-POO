@@ -9,10 +9,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 public class Inimigo extends Personagem {
-    private int distanciaDetecao = 4;
+    private int distanciaDetecao = 5;
     private boolean detectou = false;
     private transient Timer timer;
     private boolean morto = false;
+    private boolean indoParaDireita = true;
 
     public Inimigo(String nomeImagem, Fase faseAtual) {
         super(nomeImagem, faseAtual);
@@ -31,13 +32,15 @@ public class Inimigo extends Personagem {
     }
     
     public void deteccao() {
+        if(detectou){return;}
         int linhaHeroi = faseAtual.getHero().getPosicao().getLinha();
         int colunaHeroi = faseAtual.getHero().getPosicao().getColuna();
         int linhaInimigo = this.getPosicao().getLinha();
         int colunaInimigo = this.getPosicao().getColuna();
 
-        detectou = Math.abs(linhaHeroi - linhaInimigo) <= distanciaDetecao &&
-                   Math.abs(colunaHeroi - colunaInimigo) <= distanciaDetecao;
+        detectou = Math.abs(colunaHeroi - colunaInimigo) <= distanciaDetecao &&
+           Math.abs(linhaHeroi - linhaInimigo) <= 1;
+                   //Math.abs(colunaHeroi - colunaInimigo) <= distanciaDetecao;
     }
 
     public void iniciarMovimentacao() {
@@ -53,23 +56,33 @@ public class Inimigo extends Personagem {
         timer.start();
     }
 
-    public void seMovimenta() {
-        if(morto) {return;}
-        int linhaHeroi = faseAtual.getHero().getPosicao().getLinha();
-        int colunaHeroi = faseAtual.getHero().getPosicao().getColuna();
-        int linhaInimigo = this.getPosicao().getLinha();
-        int colunaInimigo = this.getPosicao().getColuna();
+        public void seMovimenta() {
+        if (morto) return;
 
-        if (linhaHeroi < linhaInimigo) {
-            moveUp();
-        } else if (linhaHeroi > linhaInimigo) {
-            moveDown();
-        } else if (colunaHeroi < colunaInimigo) {
-            moveLeft();
-        } else if (colunaHeroi > colunaInimigo) {
-            moveRight();
+        boolean conseguiuMover;
+
+        if (indoParaDireita) {
+            conseguiuMover = moveRight();
+            if (!conseguiuMover) {
+                // Tenta mudar de direção
+                indoParaDireita = false;
+                conseguiuMover = moveLeft();
+            }
+        } else {
+            conseguiuMover = moveLeft();
+            if (!conseguiuMover) {
+                // Tenta mudar de direção
+                indoParaDireita = true;
+                conseguiuMover = moveRight();
+            }
+        }
+
+        if (!conseguiuMover) {
+            morto = true;
+            faseAtual.marcarParaRemocao(this);
         }
     }
+
 
     public void voltaAUltimaPosicao() {
         this.pPosicao.volta();
@@ -179,6 +192,13 @@ public class Inimigo extends Personagem {
 
     public boolean getDetectou() {
         return this.detectou;
+    }
+    
+    public void pararMovimentacao() {
+        if (timer != null) {
+            timer.stop();
+            timer = null;
+        }
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {

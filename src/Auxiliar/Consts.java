@@ -10,6 +10,6 @@ public class Consts {
     public static final int PERIOD = 200;
     public static final String PATH = "/imgs/"; 
     public static final int TIMER = 10;
-    public static final int TOTAL_LEVEIS = 2;
+    public static final int TOTAL_LEVEIS = 5;
     public static final int MARGEM = 5;
 }
