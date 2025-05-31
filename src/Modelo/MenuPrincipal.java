@@ -5,7 +5,6 @@ import Auxiliar.Som;
 import Controler.Tela;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class MenuPrincipal extends JFrame {
     private Som menu = new Som("/sounds/menu.wav");

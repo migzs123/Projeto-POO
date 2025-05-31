@@ -41,26 +41,25 @@ public class Fase implements Serializable {
             passouSom = new Som("/sounds/win.wav"); 
             carregarFase(levelAtual);
         }
-
-       
        
        public void carregarFase(int n) {
-        personagens = new ArrayList<>();
-        personagensParaRemover = new ArrayList<>();
-        mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
-        
-        try {
-             this.ConstroiMundo(Consts.PATH + n +  "mapa.png", tela); // Padrão: 1mapa.png, 2mapa.png, etc.
-        } catch (IOException ex) {
-            Logger.getLogger(Tela.class.getName()).log(Level.SEVERE, null, ex);
+            personagens = new ArrayList<>();
+            personagensParaRemover = new ArrayList<>();
+            mapaBase = new Tile[Consts.MUNDO_ALTURA][Consts.MUNDO_LARGURA];
+
+            try {
+                 this.ConstroiMundo(Consts.PATH + n +  "mapa.png", tela); // Padrão: 1mapa.png, 2mapa.png, etc.
+            } catch (IOException ex) {
+                Logger.getLogger(Tela.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-    }
        
        public void proximaFase() {
         if (levelAtual < Consts.TOTAL_LEVEIS) {
             maxComidas = 0;
             tentativas=0;
             comidas = 0;
+            pontosFase=0;
             levelAtual++;
             passouSom.tocarUmaVez();
             this.carregarFase(levelAtual);
@@ -88,7 +87,10 @@ public class Fase implements Serializable {
            maxComidas = 0;
            tentativas++;
            comidas =0;
-           this.pontos -= pontosFase; 
+           if(this.pontos != 0){
+               this.pontos -= pontosFase; 
+           }
+           pontosFase=0;
            carregarFase(levelAtual);
            if (tela != null) {
             tela.atualizaCamera();
@@ -163,7 +165,6 @@ public class Fase implements Serializable {
            else if (pixel == 0xFFFFF200) { // Verde - PowerUp
                 PowerUp powerUpItem = new PowerUp("gelo.png", this); 
                 powerUpItem.setPosicao(y, x);
-
                 this.AdicionaEntidade(powerUpItem);
                 this.setTile(y, x, new Tile("ground.png", true, false, false)); 
             } 
@@ -296,11 +297,6 @@ public class Fase implements Serializable {
         if(this.comidas<this.maxComidas){
             this.comidas++;
         }
-    }
-    public void transformarAguaEmGelo(int y, int x) {
-        Tile novoTileDeGelo = new Tile("ground.png", true, false, false);
-        this.setTile(y, x, novoTileDeGelo);
-        System.out.println("Tile em (" + y + "," + x + ") foi transformado de água para gelo!");
     }
    
     public void marcarParaRemocao(Personagem p) {

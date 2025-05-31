@@ -270,12 +270,12 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             xIcon += tamanhoIcone + espacamento;
         }
 
-        /*
-        if (hero.temPowerUpPulo()) {
+        
+        if (hero.getPowerUp() != null && hero.getPowerUp().estaAtivo()) {
             g2d.drawImage(powerUp, xIcon, yIcon, tamanhoIcone, tamanhoIcone, null);
             g2d.setColor(new Color(0xFFFF0000));
     
-            String texto = "4";
+            String texto = "" + hero.getPowerUp().getChancesRestantes();
             fm = g2d.getFontMetrics();
             int textoLargura = fm.stringWidth(texto);
             int textoAltura = fm.getAscent(); 
@@ -284,7 +284,7 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
             int textoY = yIcon + (tamanhoIcone + textoAltura) / 2;
 
             g2d.drawString(texto, textoX, textoY+12);
-        }*/
+        }
     }
 
 
