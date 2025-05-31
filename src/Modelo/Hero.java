@@ -9,7 +9,7 @@ import javax.swing.ImageIcon;
 public class Hero extends Personagem {
 
     private transient Som falhouSom;
-    private transient Som passouSom;
+
     private boolean morto = false;
     private ImageIcon upImage, downImage, leftImage, rightImage;
 
@@ -20,7 +20,6 @@ public class Hero extends Personagem {
         this.carregarSprites();
         this.imagem = downImage;
         falhouSom = new Som("/sounds/fail.wav"); 
-        passouSom = new Som("/sounds/win.wav"); 
     }
 
     @Override
@@ -57,7 +56,6 @@ public class Hero extends Personagem {
         Tile tileAtual = faseAtual.getTile(this.getPosicao().getLinha(), this.getPosicao().getColuna());
 
         if (tileAtual != null && tileAtual.isFim()) {
-            passouSom.tocarUmaVez();
             faseAtual.proximaFase();
             return false;
         }
@@ -120,7 +118,6 @@ public class Hero extends Personagem {
         in.defaultReadObject();  // desserializa campos normais
         // recria o som
         falhouSom = new Som("/sounds/fail.wav");
-         passouSom = new Som("/sounds/win.wav");
     }
     
     public boolean moveUp() {

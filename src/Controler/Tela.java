@@ -366,6 +366,13 @@ public class Tela extends javax.swing.JFrame implements MouseListener, KeyListen
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    public void irParaFim() {
+        dispose();
+        musicaGameplay.parar();
+        this.deletarSave();
+        new TelaFim(faseAtual.getTentativas(), faseAtual.getPontos());
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
 
