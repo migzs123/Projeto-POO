@@ -2,6 +2,7 @@ package Controler;
 
 import Modelo.Personagem;
 import Modelo.Hero;
+import Modelo.Inimigo;
 import auxiliar.Posicao;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,37 +15,22 @@ public class ControleDeJogo {
         }
     }
 
-    public void processaTudo(ArrayList<Personagem> entidades) {
-        Hero hero = null;
-
-        // Encontra o herói
+    public void processaTudo(ArrayList<Personagem> entidades, ArrayList<Personagem> paraMorrer) {  
         for (Personagem p : entidades) {
             if (p instanceof Hero) {
-                hero = (Hero) p;
-                break;
+                ((Hero) p).precisaMorrer();
+            }
+            if(p instanceof Inimigo){
+                ((Inimigo) p).deteccao();
+                ((Inimigo) p).precisaMorrer();
             }
         }
-
-        if (hero == null) return; // Nenhum herói presente
-
-        Posicao posHero = hero.getPosicao();
-
-        Iterator<Personagem> it = entidades.iterator();
-        while (it.hasNext()) {
-            Personagem p = it.next();
-
-            // Ignora o próprio herói
-            if (p == hero) continue;
-
-            // Verifica colisão
-            if (posHero.igual(p.getPosicao())) {
-                if (p.isTransponivel()) {
-                    if (p.isMortal()) {
-                        it.remove(); // Remove a entidade mortal
-                    }
-                }
-            }
+        
+        for (Personagem p : paraMorrer) {
+            entidades.remove(p);
         }
+        paraMorrer.clear();
+
     }
 
     /*Retorna true se a posicao p é válida para o herói com relação a outros personagens*/
