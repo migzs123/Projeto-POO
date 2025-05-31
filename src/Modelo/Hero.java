@@ -13,6 +13,8 @@ public class Hero extends Personagem {
     private boolean morto = false;
     private ImageIcon upImage, downImage, leftImage, rightImage;
 
+    private boolean hasKey = false;
+
     public Hero(String nomeImagem, Fase faseAtual) {
         super(nomeImagem, faseAtual);
         this.carregarSprites();
@@ -27,6 +29,15 @@ public class Hero extends Personagem {
         downImage = carregarImagem(nomeImagem.replace(".png", "") + "_down.png");
         leftImage = carregarImagem(nomeImagem.replace(".png", "") + "_left.png");
         rightImage = carregarImagem(nomeImagem.replace(".png", "") + "_right.png");
+    }
+    
+    public void getKey(){
+        this.hasKey = true;
+        System.out.println("hasKey status:" + this.hasKey);
+    }
+    
+    public boolean getKeyStatus(){
+        return this.hasKey;
     }
 
     public void voltaAUltimaPosicao() {
@@ -67,7 +78,18 @@ public class Hero extends Personagem {
                 }
             }
             }
-        }
+
+            if (p instanceof Key) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Key) p).checarColisao();
+                }
+            }
+            if (p instanceof Tranca) {
+                if (p.getPosicao().igual(this.getPosicao())) {
+                    ((Tranca) p).checarColisao();
+                }
+            }
+      }
         return true;
     }
     public void precisaMorrer() {
