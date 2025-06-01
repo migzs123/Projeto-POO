@@ -1,0 +1,19 @@
+# Ignorar a pasta de build
+/build/
+
+# Ignorar arquivos .jar
+*.jar
+
+# Ignorar arquivos .class (compilados do Java)
+*.class
+build/built-jar.properties
+build/classes/Controler/Tela.class
+dist/PrototipoProjetoPOO.jar
+*.class
+*.jar
+nbproject/private/private.xml
+save.dat
+/nbproject/private/
+/exportados
+temp_zip/personagem.obj
+/dist/

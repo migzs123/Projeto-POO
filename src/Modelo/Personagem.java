@@ -1,63 +1,31 @@
 package Modelo;
 
-import Auxiliar.Consts;
-import Auxiliar.Desenho;
-import Controler.Tela;
 import auxiliar.Posicao;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.Serializable;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 
-public abstract class Personagem implements Serializable {
-
-    protected ImageIcon iImage;
+public abstract class Personagem extends Entidade {
     protected Posicao pPosicao;
-    protected boolean bTransponivel; /*Pode passar por cima?*/
-    protected boolean bMortal;       /*Se encostar, morre?*/
+    protected Fase faseAtual;
 
-    public boolean isbMortal() {
-        return bMortal;
+    public Personagem(String nomeImagem, Fase faseAtual) {
+        super(nomeImagem, true, false); 
+        this.faseAtual = faseAtual;
+        this.pPosicao = new Posicao(1, 1);
+        carregarImagem(); 
     }
 
-
-    protected Personagem(String sNomeImagePNG) {
-        this.pPosicao = new Posicao(1, 1);
-        this.bTransponivel = true;
-        this.bMortal = false;
-        try {
-            iImage = new ImageIcon(new java.io.File(".").getCanonicalPath() + Consts.PATH + sNomeImagePNG);
-            Image img = iImage.getImage();
-            BufferedImage bi = new BufferedImage(Consts.CELL_SIDE, Consts.CELL_SIDE, BufferedImage.TYPE_INT_ARGB);
-            Graphics g = bi.createGraphics();
-            g.drawImage(img, 0, 0, Consts.CELL_SIDE, Consts.CELL_SIDE, null);
-            iImage = new ImageIcon(bi);
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        }
+    // Método que as subclasses devem implementar
+    protected abstract void carregarSprites();
+    
+    public void setFase(Fase fase){
+        this.faseAtual = fase;
     }
 
     public Posicao getPosicao() {
-        /*TODO: Retirar este método para que objetos externos nao possam operar
-         diretamente sobre a posição do Personagem*/
         return pPosicao;
     }
 
-    public boolean isbTransponivel() {
-        return bTransponivel;
-    }
-
-    public void setbTransponivel(boolean bTransponivel) {
-        this.bTransponivel = bTransponivel;
-    }
-
-    public void autoDesenho(){
-        Desenho.desenhar(this.iImage, this.pPosicao.getColuna(), this.pPosicao.getLinha());        
+    public void autoDesenho() {
+        desenhar(pPosicao.getLinha(), pPosicao.getColuna()); // usa o desenhar() da superclasse
     }
 
     public boolean setPosicao(int linha, int coluna) {
@@ -65,18 +33,18 @@ public abstract class Personagem implements Serializable {
     }
 
     public boolean moveUp() {
-        return this.pPosicao.moveUp();
+        return pPosicao.moveUp();
     }
 
     public boolean moveDown() {
-        return this.pPosicao.moveDown();
+        return pPosicao.moveDown();
     }
 
     public boolean moveRight() {
-        return this.pPosicao.moveRight();
+        return pPosicao.moveRight();
     }
 
     public boolean moveLeft() {
-        return this.pPosicao.moveLeft();
+        return pPosicao.moveLeft();
     }
 }
