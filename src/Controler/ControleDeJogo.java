@@ -3,7 +3,7 @@ package Controler;
 import Modelo.Personagem;
 import Modelo.Hero;
 import Modelo.Inimigo;
-import auxiliar.Posicao;
+import Auxiliar.Posicao;
 import java.util.ArrayList;
 import java.util.Iterator;
 

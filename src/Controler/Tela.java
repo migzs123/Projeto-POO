@@ -4,7 +4,7 @@ import Modelo.*;
 import Auxiliar.Consts;
 import Auxiliar.Desenho;
 import Auxiliar.Som;
-import auxiliar.Posicao;
+import Auxiliar.Posicao;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;

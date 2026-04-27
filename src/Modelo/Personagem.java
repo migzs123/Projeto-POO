@@ -1,6 +1,6 @@
 package Modelo;
 
-import auxiliar.Posicao;
+import Auxiliar.Posicao;
 
 public abstract class Personagem extends Entidade {
     protected Posicao pPosicao;
